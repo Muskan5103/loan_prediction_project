@@ -1,0 +1,95 @@
+{% extends 'predictor/base.html' %}
+
+{% block title %}Superuser History{% endblock %}
+
+{% block content %}
+
+<div class="card shadow-lg border-danger">
+    <div class="card-header bg-danger text-white fw-bold">
+        🔐 Superuser Loan History (Full Audit)
+    </div>
+
+    <div class="card-body">
+
+        {% if records %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>User</th>
+                        <th>Date</th>
+                        <th>Income</th>
+                        <th>Loan</th>
+                        <th>AI Result</th>
+                        <th>Admin Decision</th>
+                        <th>Probability</th>
+                        <th>Risk</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for r in records %}
+                    <tr class="text-center">
+                        <td>{{ r.user.username }}</td>
+                        <td>{{ r.created_at|date:"d M Y, H:i" }}</td>
+                        <td>₹ {{ r.applicant_income }}</td>
+                        <td>₹ {{ r.loan_amount }}</td>
+
+                        <!-- AI RESULT -->
+                        <td>
+                            {% if "Approved" in r.ai_result %}
+                                <span class="text-success fw-bold">
+                                    🤖 Approved
+                                </span>
+                            {% else %}
+                                <span class="text-danger fw-bold">
+                                    🤖 Rejected
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- ADMIN DECISION -->
+                        <td>
+                            {% if r.admin_decision == "Approved" %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif r.admin_decision == "Rejected" %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Pending</span>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ r.probability }}%</td>
+
+                        <!-- RISK -->
+                        <td>
+                            {% if r.probability > 80 %}
+                                <span class="badge bg-success">Low</span>
+                            {% elif r.probability >= 50 %}
+                                <span class="badge bg-warning text-dark">Medium</span>
+                            {% else %}
+                                <span class="badge bg-danger">High</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+            <div class="alert alert-warning text-center">
+                No records found.
+            </div>
+        {% endif %}
+
+        <div class="text-center mt-3">
+            <a href="{% url 'home' %}" class="btn btn-secondary">
+                ⬅ Back
+            </a>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

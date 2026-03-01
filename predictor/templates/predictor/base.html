@@ -1,0 +1,130 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Loan Approval System{% endblock %}</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'predictor/css/style.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+
+
+    <nav class="navbar navbar-expand-lg navbar-dark shadow"
+        style="background: linear-gradient(135deg, #0d6efd, #084298);">
+        <div class="container-fluid px-4">
+
+            <!-- Logo -->
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="{% url 'home' %}">
+                <span style="font-size:1.4rem;">💳</span>
+                <span>Loan Predictor</span>
+            </a>
+
+            <!-- Right Side -->
+            <div class="d-flex align-items-center gap-3 ms-auto">
+
+                <!-- Dark Mode -->
+                <button id="themeToggle" class="btn btn-warning btn-sm rounded-pill px-3" title="Toggle Dark Mode">
+                    🌙
+                </button>
+
+                {% if user.is_authenticated %}
+
+                <div class="dropdown">
+
+                    <!-- Profile Button -->
+                    <button class="btn btn-outline-light btn-sm rounded-pill px-3 his dropdown-toggle" type="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        👤 {{ user.username }}
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+
+                        <!-- History (role-based) -->
+                        {% if user.is_staff and not user.is_superuser %}
+                        <li>
+                            <a class="dropdown-item" href="{% url 'admin_history' %}">
+                                📊 Admin History
+                            </a>
+                        </li>
+
+                        {% elif user.is_superuser %}
+                        <li>
+                            <a class="dropdown-item" href="{% url 'admin_history' %}">
+                                📊 System History
+                            </a>
+                        </li>
+
+                        {% else %}
+                        <li>
+                            <a class="dropdown-item" href="{% url 'history' %}">
+                                📊 My History
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+                        <!-- Logout -->
+                        <li>
+                            <a class="dropdown-item text-danger" href="{% url 'logout' %}">
+                                🚪 Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                {% else %}
+
+                <!-- Login / Register (no dropdown) -->
+                <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                    🔐 Login
+                </a>
+
+                <a href="{% url 'register' %}" class="btn btn-warning btn-sm rounded-pill px-3">
+                    📝 Register
+                </a>
+
+                {% endif %}
+
+
+            </div>
+        </div>
+    </nav>
+
+
+
+
+
+
+
+    <!-- PAGE CONTENT -->
+    <div class="container py-5">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="{% static 'predictor/js/main.js' %}"></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

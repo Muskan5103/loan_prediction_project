@@ -1,0 +1,37 @@
+{% extends 'predictor/base.html' %}
+
+{% block title %}
+Upload ML Model
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        <div class="card-header bg-danger text-white fw-bold">
+            🔐 Super Admin – Upload Model
+        </div>
+
+        <div class="card-body text-center">
+
+            <p class="text-muted">
+                Only <strong>Super Admins</strong> can upload or replace the ML model.
+            </p>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <input type="file" name="model" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn btn-danger px-4">
+                    ⬆ Upload Model
+                </button>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "predictor/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <h2 class="mb-4">👑 Super Admin Dashboard</h2>
+
+  <!-- STATS -->
+  <div class="row g-4 mb-4">
+
+    <div class="col-md-3">
+      <div class="card shadow p-3">
+        <h6>Active ML Model</h6>
+        <strong>
+          {% if active_model %}
+            {{ active_model.file.name }}
+          {% else %}
+            No Active Model
+          {% endif %}
+        </strong>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card shadow p-3">
+        <h6>Total Predictions</h6>
+        <strong>{{ total_predictions }}</strong>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card shadow p-3">
+        <h6>AI Decisions</h6>
+        <strong>{{ ai_decisions }}</strong>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card shadow p-3">
+        <h6>Admin Decisions</h6>
+        <strong>{{ admin_decisions }}</strong>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="mb-4 okk">
+    <a href="{% url 'upload_model' %}" class="btn btn-danger me-2">
+      📤 Upload / Replace ML Model
+    </a>
+    <a href="{% url 'system_history' %}" class="btn btn-secondary">
+      📜 View System Logs
+    </a>
+  </div>
+
+  <!-- AUDIT LOGS -->
+  <div class="card shadow">
+    <div class="card-header fw-bold">
+      🧾 Recent System Activity
+    </div>
+    <ul class="list-group list-group-flush">
+      {% for log in recent_logs %}
+        <li class="list-group-item">
+          <strong>{{ log.user }}</strong> — {{ log.action }}
+          <br>
+          <small class="text-muted">{{ log.timestamp }}</small>
+        </li>
+      {% empty %}
+        <li class="list-group-item text-muted">No activity yet</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% if active_model %}
+  <p><strong>Active Model:</strong> {{ active_model.file.name }}</p>
+{% else %}
+  <div class="alert alert-warning">
+    No ML model uploaded yet. Please upload one.
+  </div>
+{% endif %}
+
+
+</div>
+{% endblock %}

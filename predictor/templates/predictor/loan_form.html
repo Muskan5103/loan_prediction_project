@@ -1,0 +1,111 @@
+{% extends 'predictor/base.html' %}
+{% load static %}
+
+{% block title %}
+Loan Application | Loan Approval Predictor
+{% endblock %}
+
+{% block content %}
+<div class="form-header">
+    <h1>Loan Eligibility Application</h1>
+    <p>Fill in your details to check loan approval instantly</p>
+</div>
+
+<div class="loan-form-wrapper">
+    <form method="post" action="{% url 'result' %}">
+        {% csrf_token %}
+
+        <!-- ================= PERSONAL DETAILS ================= -->
+        <h6 class="text-info fw-bold mb-3">Personal Details</h6>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.gender.label }}</label>
+                {{ form.gender }}
+                {{ form.gender.errors }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.married.label }}</label>
+                {{ form.married }}
+                {{ form.married.errors }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.dependents.label }}</label>
+                {{ form.dependents }}
+                {{ form.dependents.errors }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.education.label }}</label>
+                {{ form.education }}
+                {{ form.education.errors }}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">{{ form.self_employed.label }}</label>
+            {{ form.self_employed }}
+            {{ form.self_employed.errors }}
+        </div>
+
+        <hr>
+
+        <!-- ================= FINANCIAL DETAILS ================= -->
+        <h6 class="text-info fw-bold mb-3">Financial Details</h6>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.applicant_income.label }}</label>
+                {{ form.applicant_income }}
+                {{ form.applicant_income.errors }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.coapplicant_income.label }}</label>
+                {{ form.coapplicant_income }}
+                {{ form.coapplicant_income.errors }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.loan_amount.label }}</label>
+                {{ form.loan_amount }}
+                {{ form.loan_amount.errors }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.loan_term.label }}</label>
+                {{ form.loan_term }}
+                {{ form.loan_term.errors }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.credit_history.label }}</label>
+                {{ form.credit_history }}
+                {{ form.credit_history.errors }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">{{ form.property_area.label }}</label>
+                {{ form.property_area }}
+                {{ form.property_area.errors }}
+            </div>
+        </div>
+
+        <!-- ================= SUBMIT ================= -->
+        <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-success btn-lg rounded-pill">
+                🔍 Check Loan Status
+            </button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

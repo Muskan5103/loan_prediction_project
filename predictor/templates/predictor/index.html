@@ -1,0 +1,58 @@
+{% extends 'predictor/base.html' %}
+
+{% block title %}
+Home | Loan Approval Predictor
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero hero-bg">
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+        <h1>Loan Approval Prediction</h1>
+        <p>
+            Predict your loan approval instantly using
+            <span>Machine Learning</span>.
+        </p>
+
+        <div class="hero-buttons">
+            <a href="{% url 'loan_form' %}" class="btn primary">Check Loan Eligibility</a>
+            <a href="#how-it-works" class="btn secondary">How It Works</a>
+        </div>
+    </div>
+</section>
+
+
+<!-- How It Works -->
+<section id="how-it-works" class="how">
+    <h2>How It Works</h2>
+
+    <div class="steps">
+        <div class="card">
+            <h3>1️⃣ Enter Details</h3>
+            <p>Provide personal and financial information.</p>
+        </div>
+
+        <div class="card">
+            <h3>2️⃣ ML Analysis</h3>
+            <p>Our trained ML model analyzes your data.</p>
+        </div>
+
+        <div class="card">
+            <h3>3️⃣ Get Result</h3>
+            <p>Instant prediction: Approved or Not Approved.</p>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+    <h2>Ready to check your loan eligibility?</h2>
+    <a href="{% url 'loan_form' %}" class="btn primary">
+        Start Prediction
+    </a>
+</section>
+
+{% endblock %}

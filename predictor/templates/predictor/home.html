@@ -1,0 +1,39 @@
+{% extends 'predictor/base.html' %}
+
+{% block title %}
+Loan Approval Prediction
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-center align-items-center mt-4">
+    <div class="card shadow-lg w-100 card-custom" style="max-width: 600px;">
+
+        <div class="card-header bg-primary text-white fw-bold">
+            Loan Approval Prediction
+        </div>
+
+        <div class="card-body">
+
+        {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
+
+            <!-- ✅ ONLY NORMAL USERS SEE THIS -->
+            {% include "predictor/loan_form.html" %}
+
+        {% else %}
+
+            <!-- 🚫 ADMIN & SUPERADMIN SEE THIS -->
+            <div class="text-center py-5">
+                <h4 class="text-danger">🚫 Access Restricted</h4>
+                <p class="text-muted">
+                    Loan application is available only for normal users.
+                </p>
+            </div>
+
+        {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

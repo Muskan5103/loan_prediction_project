@@ -1,0 +1,84 @@
+{% extends 'predictor/base.html' %}
+
+{% block title %}
+Loan Prediction Result
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-center align-items-center mt-4">
+    <div class="card shadow-lg w-100 text-center card-custom" style="max-width: 500px;">
+
+        <div class="card-header bg-primary text-white fw-bold">
+            Loan Prediction Result
+        </div>
+
+        <div class="card-body">
+
+            {# ================= FRAUD DETECTION ================= #}
+            {% if fraud %}
+                <h3 class="text-warning">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Potential Fraud Detected
+                </h3>
+
+                <ul class="text-start mt-3">
+                    {% for reason in fraud_reasons %}
+                        <li>{{ reason }}</li>
+                    {% endfor %}
+                </ul>
+
+                <p class="fw-semibold mt-2">
+                    🔍 Application sent for manual review.
+                </p>
+
+            {# ================= NORMAL RESULT ================= #}
+            {% else %}
+
+                {% if "Approved" in result %}
+                    <h3 class="text-success">
+                        <i class="fa-solid fa-circle-check"></i>
+                        Loan Approved
+                    </h3>
+                {% else %}
+                    <h3 class="text-danger">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                        Loan Rejected
+                    </h3>
+                {% endif %}
+
+                <p class="mt-3 pr fw-semibold">
+                    Approval Probability: {{ probability }}%
+                </p>
+
+                {% if risk == "Low" %}
+                    <div class="risk-badge low-risk">
+                        <span class="risk-dot"></span> Low Risk
+                    </div>
+                {% elif risk == "Medium" %}
+                    <div class="risk-badge medium-risk">
+                        <span class="risk-dot"></span> Medium Risk
+                    </div>
+                {% else %}
+                    <div class="risk-badge high-risk">
+                        <span class="risk-dot"></span> High Risk
+                    </div>
+                {% endif %}
+
+            {% endif %}
+
+            <div class="d-grid gap-2 mt-4">
+                <a href="{% url 'home' %}" class="btn btn-outline-primary">
+                    🔙 Back to Home
+                </a>
+
+                <a href="{% url 'history' %}" class="btn btn-outline-secondary">
+                    📊 View History
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
