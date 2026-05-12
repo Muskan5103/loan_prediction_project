@@ -1,17 +1,18 @@
 from django.contrib import admin
-from .models import LoanHistory
+from .models import LoanApplication
 
 
-@admin.register(LoanHistory)
-class LoanHistoryAdmin(admin.ModelAdmin):
+@admin.register(LoanApplication)
+class LoanApplicationAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'user',
         'loan_amount',
-        'ai_result',
         'probability',
-        'admin_decision',
+        'status',
+        'admin',
+        'created_at',
     )
 
-    list_filter = ('admin_decision',)
+    list_filter = ('status', 'created_at')
     search_fields = ('user__username',)

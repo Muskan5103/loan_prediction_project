@@ -9,35 +9,35 @@
   <!-- STATS -->
   <div class="row g-4 mb-4">
 
-    <div class="col-md-3">
-      <div class="card shadow p-3">
+    <div class="col-md-3 ">
+      <div class="card shadow  co p-3">
         <h6>Active ML Model</h6>
         <strong>
           {% if active_model %}
-            {{ active_model.file.name }}
+          {{ active_model.file.name }}
           {% else %}
-            No Active Model
+          No Active Model
           {% endif %}
         </strong>
       </div>
     </div>
 
     <div class="col-md-3">
-      <div class="card shadow p-3">
+      <div class="card shadow co p-3">
         <h6>Total Predictions</h6>
         <strong>{{ total_predictions }}</strong>
       </div>
     </div>
 
     <div class="col-md-3">
-      <div class="card shadow p-3">
+      <div class="card shadow co p-3">
         <h6>AI Decisions</h6>
         <strong>{{ ai_decisions }}</strong>
       </div>
     </div>
 
     <div class="col-md-3">
-      <div class="card shadow p-3">
+      <div class="card shadow co p-3">
         <h6>Admin Decisions</h6>
         <strong>{{ admin_decisions }}</strong>
       </div>
@@ -62,23 +62,104 @@
     </div>
     <ul class="list-group list-group-flush">
       {% for log in recent_logs %}
-        <li class="list-group-item">
-          <strong>{{ log.user }}</strong> — {{ log.action }}
-          <br>
-          <small class="text-muted">{{ log.timestamp }}</small>
-        </li>
+      <li class="list-group-item">
+        <strong>{{ log.user }}</strong> — {{ log.action }}
+        <br>
+        <small class="text-muted">{{ log.timestamp }}</small>
+      </li>
       {% empty %}
-        <li class="list-group-item text-muted">No activity yet</li>
+      <li class="list-group-item text-muted">No activity yet</li>
       {% endfor %}
     </ul>
   </div>
+  <div class="model-section">
+
+    <h2>🤖 ML Model Comparison</h2>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Version</th>
+                <th>Accuracy</th>
+                <th>Status</th>
+                <th>Uploaded</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for model in models %}
+
+            <tr>
+
+                <td>{{ model.version }}</td>
+
+                <td>
+                    {{ model.accuracy }}%
+                </td>
+
+                <td>
+
+                    {% if model.is_active %}
+
+                        <span class="active-badge">
+                            ACTIVE
+                        </span>
+
+                    {% else %}
+
+                        <span class="inactive-badge">
+                            INACTIVE
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+                    {{ model.uploaded_at|date:"M d, Y" }}
+                </td>
+
+                <td>
+
+                    {% if not model.is_active %}
+
+                    <a href="{% url 'activate_model' model.id %}">
+
+                        <button class="activate-btn">
+                            Activate
+                        </button>
+
+                    </a>
+
+                    {% else %}
+
+                    <button class="active-btn">
+                        Active
+                    </button>
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
   {% if active_model %}
   <p><strong>Active Model:</strong> {{ active_model.file.name }}</p>
-{% else %}
+  {% else %}
   <div class="alert alert-warning">
     No ML model uploaded yet. Please upload one.
   </div>
-{% endif %}
+  {% endif %}
 
 
 </div>

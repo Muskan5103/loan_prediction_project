@@ -27,7 +27,16 @@
         <div class="container-fluid px-4">
 
             <!-- Logo -->
-            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="{% url 'home' %}">
+           <a class="navbar-brand fw-bold d-flex align-items-center gap-2"
+   href="
+   {% if user.is_superuser %}
+       {% url 'superadmin_dashboard' %}
+   {% elif user.is_staff %}
+       {% url 'admin_dashboard' %}
+   {% else %}
+       {% url 'index' %}
+   {% endif %}
+">
                 <span style="font-size:1.4rem;">💳</span>
                 <span>Loan Predictor</span>
             </a>
@@ -63,7 +72,7 @@
 
                         {% elif user.is_superuser %}
                         <li>
-                            <a class="dropdown-item" href="{% url 'admin_history' %}">
+                            <a class="dropdown-item" href="{% url 'superuser_history' %}">
                                 📊 System History
                             </a>
                         </li>
@@ -125,6 +134,105 @@
     <script src="{% static 'predictor/js/main.js' %}"></script>
 
     {% block extra_js %}{% endblock %}
+    <!-- CHATBOT BUTTON -->
+
+<div class="chatbot-icon" onclick="toggleChat()">
+
+    <div class="bot-ring"></div>
+
+    <div class="bot-inner">
+        🤖
+    </div>
+
+</div>
+
+<!-- CHAT WINDOW -->
+
+<div class="chatbot-box" id="chatbotBox">
+
+    <div class="chat-header">
+        Loan Assistant 🤖
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        <div class="bot-message">
+            Hello 👋 Ask me about loans.
+        </div>
+    </div>
+
+    <div class="chat-input-area">
+
+        <input
+            type="text"
+            id="chatInput"
+            placeholder="Type message..."
+        >
+
+        <button onclick="sendMessage()">
+            Send
+        </button>
+
+    </div>
+
+</div>
+<script>
+
+function toggleChat(){
+
+    let box = document.getElementById("chatbotBox");
+
+    if(box.style.display === "block"){
+        box.style.display = "none";
+    }
+    else{
+        box.style.display = "block";
+    }
+}
+
+async function sendMessage(){
+
+    let input = document.getElementById("chatInput");
+
+    let message = input.value;
+
+    if(message.trim() === "") return;
+
+    let messages = document.getElementById("chatMessages");
+
+    messages.innerHTML += `
+        <div class="user-message">
+            ${message}
+        </div>
+    `;
+
+    input.value = "";
+
+    let response = await fetch("/chatbot/",{
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json",
+            "X-CSRFToken":"{{ csrf_token }}"
+        },
+
+        body:JSON.stringify({
+            message:message
+        })
+    });
+
+    let data = await response.json();
+
+    messages.innerHTML += `
+        <div class="bot-message">
+            ${data.response}
+        </div>
+    `;
+
+    messages.scrollTop = messages.scrollHeight;
+}
+
+</script>
 </body>
 
 </html>

@@ -1,0 +1,84 @@
+{% extends 'predictor/base.html' %}
+
+{% block title %}
+System Audit Logs
+{% endblock %}
+
+{% block content %}
+
+<div class="card shadow-lg border-danger">
+
+    <div class="card-header bg-dark text-white fw-bold">
+        🧾 System Audit Logs
+    </div>
+
+    <div class="card-body">
+
+        {% if records %}
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered table-striped">
+
+                <thead class="table-dark text-center">
+
+                    <tr>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Timestamp</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for r in records %}
+
+                    <tr class="text-center">
+
+                        <td>
+                            {{ r.user.username }}
+                        </td>
+
+                        <td>
+                            {{ r.action }}
+                        </td>
+
+                        <td>
+                            {{ r.timestamp|date:"d M Y, H:i" }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="alert alert-warning text-center">
+            No logs found.
+        </div>
+
+        {% endif %}
+
+        <div class="text-center mt-3">
+
+            <a href="{% url 'superadmin_dashboard' %}"
+               class="btn btn-secondary">
+
+               ⬅ Back to Dashboard
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

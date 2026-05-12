@@ -59,9 +59,18 @@ class LoanForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-select'})
     )
 
+    # ✅ DOCUMENT UPLOAD FIELD
+    document = forms.FileField(
+        required=False,
+        widget=forms.ClearableFileInput(
+            attrs={'class': 'form-control'}
+        )
+    )
 
-# ✅ RESTORED REGISTER FORM
+
+# ✅ REGISTER FORM
 class RegisterForm(UserCreationForm):
+
     email = forms.EmailField(required=True)
 
     class Meta:

@@ -25,23 +25,20 @@ Prediction History
 
             <div class="col-md-3">
                 <select name="status" class="form-select">
-  <option value="">All Results</option>
+                    <option value="">All Results</option>
 
-  <option value="Approved"
-    {% if request.GET.status == "Approved" %}selected{% endif %}>
-    Approved
-  </option>
+<option value="AI_APPROVED" {% if request.GET.status == "AI_APPROVED" %}selected{% endif %}>
+    AI Approved
+</option>
 
-  <option value="Rejected"
-    {% if request.GET.status == "Rejected" %}selected{% endif %}>
+<option value="ADMIN_APPROVED" {% if request.GET.status == "ADMIN_APPROVED" %}selected{% endif %}>
+    Admin Approved
+</option>
+
+<option value="REJECTED" {% if request.GET.status == "REJECTED" %}selected{% endif %}>
     Rejected
-  </option>
-
-  <option value="Pending"
-    {% if request.GET.status == "Pending" %}selected{% endif %}>
-    Pending
-  </option>
-</select>
+</option>
+                </select>
 
             </div>
 
@@ -79,62 +76,60 @@ Prediction History
                 <tbody>
                     {% for r in records %}
                     <tr class="text-center">
+
                         <td>{{ r.created_at|date:"d M Y, H:i" }}</td>
                         <td>₹ {{ r.applicant_income }}</td>
                         <td>₹ {{ r.loan_amount }}</td>
+
+                        <!-- ✅ AI RESULT -->
                         <td>
-                            {% if "Approved" in r.ai_result %}
+                            {% if r.status == "AI_APPROVED" %}
                             <span class="text-success fw-bold">
                                 <i class="fa-solid fa-robot"></i> Approved (AI)
                             </span>
-                            {% else %}
+                            {% elif r.status == "REJECTED" %}
                             <span class="text-danger fw-bold">
                                 <i class="fa-solid fa-robot"></i> Rejected (AI)
                             </span>
-                            {% endif %}
-                        </td>
-
-                        <td>
-                            {% if r.admin_decision == "Approved" %}
-                            <span class="admin-badge admin-approved">
-                                🧑‍⚖ Approved
-                            </span>
-
-                            {% elif r.admin_decision == "Rejected" %}
-                            <span class="admin-badge admin-rejected">
-                                🧑‍⚖ Rejected
-                            </span>
-
                             {% else %}
-                            <span class="admin-badge admin-pending">
-                                🤖 Pending
+                            <span class="text-warning fw-bold">
+                                <i class="fa-solid fa-robot"></i> Pending
                             </span>
                             {% endif %}
                         </td>
 
+                        <!-- ✅ ADMIN DECISION -->
+                        <td>
+                            {% if r.status == "ADMIN_APPROVED" %}
+                            <span class="badge bg-success">🧑‍⚖ Approved</span>
+                            {% elif r.status == "REJECTED" %}
+                            <span class="badge bg-danger">🧑‍⚖ Rejected</span>
+                            {% else %}
+                            <span class="badge bg-warning">🤖 Pending</span>
+                            {% endif %}
+                        </td>
 
                         <td>{{ r.probability }}%</td>
+
+                        <!-- ✅ FRAUD -->
                         <td>
-  {% if r.is_fraud %}
-    <span class="badge bg-danger">🚨 Fraud</span>
-  {% else %}
-    <span class="badge bg-success">✅ Normal</span>
-  {% endif %}
-</td>
+                            {% if r.fraud_reason %}
+                            <span class="badge bg-danger">🚨 Fraud</span>
+                            {% else %}
+                            <span class="badge bg-success">✅ Normal</span>
+                            {% endif %}
+                        </td>
 
-
-
+                        <!-- ✅ RISK -->
                         <td>
                             {% if r.probability > 80 %}
                             <span class="risk-badge low-risk">
                                 <span class="risk-dot"></span> Low
                             </span>
-
                             {% elif r.probability >= 50 %}
                             <span class="risk-badge medium-risk">
                                 <span class="risk-dot"></span> Medium
                             </span>
-
                             {% else %}
                             <span class="risk-badge high-risk">
                                 <span class="risk-dot"></span> High
@@ -155,7 +150,7 @@ Prediction History
         {% endif %}
 
         <div class="text-center mt-3">
-            <a href="{% url 'home' %}" class="btn btn-secondary">
+            <a href="{% url 'index' %}" class="btn btn-secondary">
                 ⬅ Back to Prediction
             </a>
         </div>

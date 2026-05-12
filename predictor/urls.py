@@ -47,7 +47,10 @@ from . import views
 urlpatterns = [
 
     # 🏠 LANDING PAGE
-    path('', views.index, name='home'),
+    path('', views.index, name='index'),
+
+    # 🏠 ROLE BASED HOME (optional)
+    path('home/', views.home, name='home'),
 
     # 📝 LOAN PREDICTION
     path('loan-form/', views.loan_form, name='loan_form'),
@@ -81,4 +84,22 @@ urlpatterns = [
     # 📤 EXPORTS
     path('export/csv/', views.export_csv, name='export_csv'),
     path('export/pdf/', views.export_pdf, name='export_pdf'),
+    path(
+    'activate-model/<int:model_id>/',
+    views.activate_model,
+    name='activate_model'
+),
+
+path(
+    'predict-loan/',
+    views.predict_loan_api,
+    name='predict_loan_api'
+),
+
+path(
+    'loan-history/',
+    views.loan_history_api,
+    name='loan_history_api'
+),
+path('chatbot/', views.chatbot, name='chatbot'),
 ]

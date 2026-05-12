@@ -1,51 +1,15 @@
 {% extends 'predictor/base.html' %}
 
-{% block title %}
-Prediction History
-{% endblock %}
+{% block title %}Admin History{% endblock %}
 
 {% block content %}
 
 <div class="card shadow-lg">
-    <div class="card-header bg-primary text-white fw-bold">
-        📊 Loan Prediction History
+    <div class="card-header bg-dark text-white fw-bold">
+        📊 Admin Loan History
     </div>
 
     <div class="card-body">
-        <!-- 🔍 Filters & Search -->
-        <form method="get" class="row g-3 mb-4">
-
-            <div class="col-md-2">
-                <input type="date" name="start_date" class="form-control" value="{{ request.GET.start_date }}">
-            </div>
-
-            <div class="col-md-2">
-                <input type="date" name="end_date" class="form-control" value="{{ request.GET.end_date }}">
-            </div>
-
-            <div class="col-md-3">
-                <select name="status" class="form-select">
-                    <option value="">All Results</option>
-                    <option value="Approved" {% if request.GET.status == "Approved" %}selected{% endif %}>Approved
-                    </option>
-                    <option value="Rejected" {% if request.GET.status == "Rejected" %}selected{% endif %}>Rejected
-                    </option>
-                    <option value="Pending" {% if request.GET.status == "Pending" %}selected{% endif %}>Pending</option>
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <input type="text" name="search" class="form-control" placeholder="Search income or loan amount"
-                    value="{{ request.GET.search }}">
-            </div>
-
-            <div class="col-md-2 d-grid">
-                <button class="btn btn-primary">
-                    🔍 Apply
-                </button>
-            </div>
-
-        </form>
 
         {% if records %}
         <div class="table-responsive">
@@ -54,91 +18,82 @@ Prediction History
                     <tr>
                         <th>User</th>
                         <th>Date</th>
-                        <th>Applicant Income</th>
-                        <th>Loan Amount</th>
-                        <th>Result</th>
-                        <th>Admin Decision</th>
-                        <th>Probability (%)</th>
+                        <th>Income</th>
+                        <th>Loan</th>
+                        <th>AI Result</th>
+                        <th>Final Status</th>
+                        <th>Probability</th>
                         <th>Risk</th>
-
-
                     </tr>
                 </thead>
 
                 <tbody>
-                    {% for r in records %}
+                {% for r in records %}
                     <tr class="text-center">
-                        <td>{{ r.user.username }}</td>
 
+                        <td>{{ r.user.username }}</td>
                         <td>{{ r.created_at|date:"d M Y, H:i" }}</td>
                         <td>₹ {{ r.applicant_income }}</td>
                         <td>₹ {{ r.loan_amount }}</td>
+
+                        <!-- 🤖 AI RESULT -->
                         <td>
-    {% if "Approved" in r.ai_result %}
-        <span class="text-success fw-bold">
-            <i class="fa-solid fa-robot"></i> Approved (AI)
-        </span>
-    {% else %}
-        <span class="text-danger fw-bold">
-            <i class="fa-solid fa-robot"></i> Rejected (AI)
-        </span>
-    {% endif %}
-</td>
-
-                        <td>
-                            {% if r.admin_decision == "Approved" %}
-                            <span class="admin-badge admin-approved">
-                                🧑‍⚖ Approved
-                            </span>
-
-                            {% elif r.admin_decision == "Rejected" %}
-                            <span class="admin-badge admin-rejected">
-                                🧑‍⚖ Rejected
-                            </span>
-
+                            {% if r.status == "AI_APPROVED" or r.status == "ADMIN_APPROVED" %}
+                                <span class="text-success fw-bold">
+                                    🤖 Approved
+                                </span>
                             {% else %}
-                            <span class="admin-badge admin-pending">
-                                🤖 Pending
-                            </span>
+                                <span class="text-danger fw-bold">
+                                    🤖 Rejected
+                                </span>
                             {% endif %}
                         </td>
 
-
-                        <td>{{ r.probability }}%</td>
-
+                        <!-- 👮 FINAL STATUS -->
                         <td>
-                            {% if r.probability > 80 %}
-                            <span class="risk-badge low-risk">
-                                <span class="risk-dot"></span> Low
-                            </span>
+                            {% if r.status == "ADMIN_APPROVED" %}
+                                <span class="badge bg-success">Admin Approved</span>
 
-                            {% elif r.probability >= 50 %}
-                            <span class="risk-badge medium-risk">
-                                <span class="risk-dot"></span> Medium
-                            </span>
+                            {% elif r.status == "AI_APPROVED" %}
+                                <span class="badge bg-info text-dark">AI Approved</span>
+
+                            {% elif r.status == "REJECTED" %}
+                                <span class="badge bg-danger">Rejected</span>
 
                             {% else %}
-                            <span class="risk-badge high-risk">
-                                <span class="risk-dot"></span> High
-                            </span>
+                                <span class="badge bg-secondary">Pending</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- 📊 PROBABILITY -->
+                        <td>{{ r.probability }}%</td>
+
+                        <!-- ⚠️ RISK -->
+                        <td>
+                            {% if r.probability > 80 %}
+                                <span class="badge bg-success">Low</span>
+                            {% elif r.probability >= 50 %}
+                                <span class="badge bg-warning text-dark">Medium</span>
+                            {% else %}
+                                <span class="badge bg-danger">High</span>
                             {% endif %}
                         </td>
 
                     </tr>
-                    {% endfor %}
+                {% endfor %}
                 </tbody>
             </table>
         </div>
 
         {% else %}
-        <div class="alert alert-warning text-center">
-            No prediction history found.
-        </div>
+            <div class="alert alert-warning text-center">
+                No records found.
+            </div>
         {% endif %}
 
         <div class="text-center mt-3">
-            <a href="{% url 'home' %}" class="btn btn-secondary">
-                ⬅ Back to Prediction
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">
+                ⬅ Back to Dashboard
             </a>
         </div>
 

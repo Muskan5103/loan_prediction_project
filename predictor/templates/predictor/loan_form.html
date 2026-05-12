@@ -12,7 +12,7 @@ Loan Application | Loan Approval Predictor
 </div>
 
 <div class="loan-form-wrapper">
-    <form method="post" action="{% url 'result' %}">
+   <form method="post" action="{% url 'result' %}" enctype="multipart/form-data">
         {% csrf_token %}
 
         <!-- ================= PERSONAL DETAILS ================= -->
@@ -98,7 +98,25 @@ Loan Application | Loan Approval Predictor
                 {{ form.property_area.errors }}
             </div>
         </div>
+<hr>
 
+<!-- ================= DOCUMENT UPLOAD ================= -->
+<h6 class="text-info fw-bold mb-3">
+    Upload Documents
+</h6>
+
+<div class="mb-4">
+    <label class="form-label">
+        Aadhaar / PAN / Salary Slip
+    </label>
+
+    {{ form.document }}
+    {{ form.document.errors }}
+
+    <small class="text">
+        Upload PDF, JPG or PNG file
+    </small>
+</div>
         <!-- ================= SUBMIT ================= -->
         <div class="d-grid mt-4">
             <button type="submit" class="btn btn-success btn-lg rounded-pill">

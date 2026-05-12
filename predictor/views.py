@@ -1,9 +1,13 @@
 from multiprocessing import context
 from urllib import request
 from django.shortcuts import render, redirect
-
+from .models import LoanApplication
 from .forms import LoanForm
-from .models import LoanHistory
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from .serializers import LoanApplicationSerializer
 import pickle
 import numpy as np
 import os
@@ -11,114 +15,100 @@ from django.conf import settings
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from .forms import RegisterForm
+from django.http import JsonResponse
+import json
+
+# MODEL_PATH = os.path.join(settings.BASE_DIR, 'predictor', 'ml', 'loan_model.pkl')
+# model = pickle.load(open(MODEL_PATH, 'rb'))
 
 
-MODEL_PATH = os.path.join(settings.BASE_DIR, 'predictor', 'ml', 'loan_model.pkl')
-model = pickle.load(open(MODEL_PATH, 'rb'))
 
+import os
+import pickle
+from django.conf import settings
+
+
+def load_active_model():
+
+    model_path = os.path.join(
+        settings.BASE_DIR,
+        'ml_models',
+        'loan_model.pkl'
+    )
+
+    with open(model_path, 'rb') as file:
+        model = pickle.load(file)
+
+    return model
 
 from django.shortcuts import redirect
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
+
+from django.core.exceptions import PermissionDenied
+
 @login_required
 def home(request):
     user = request.user
 
-    # Super Admin
+    # 👑 Super Admin → redirect
     if user.is_superuser:
         return redirect("superadmin_dashboard")
 
-    # Admin (staff but not superuser)
+    # 👨‍💼 Admin → redirect
     if user.is_staff:
-        return redirect("admin_dashboard")  
-    
-    form = LoanForm()
-    return render(request, 'predictor/home.html', {
-        'form': form
-    })
-    
+        return redirect("admin_dashboard")
+
+    # 👤 Normal user only
+    return render(request, 'predictor/home.html')
+
+
+def index(request):
+    # 👑 Superadmin redirect
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            return redirect("superadmin_dashboard")
+
+        # 👨‍💼 Admin redirect
+        if request.user.is_staff:
+            return redirect("admin_dashboard")
+
+    # 👤 Guest + normal user
+    return render(request, "predictor/index.html")
+
+
+def generate_ai_explanation(income, loan_amount, probability):
+    reasons = []
+
+    if income >= 5000:
+        reasons.append("Income is sufficient")
+    else:
+        reasons.append("Low income")
+
+    if loan_amount <= income * 20:
+        reasons.append("Loan within safe limit")
+    else:
+        reasons.append("High loan amount")
+
+    if probability >= 0.7:
+        reasons.append("High approval probability")
+    else:
+        reasons.append("Low approval probability")
+
+    return " | ".join(reasons)
 
 
 
 
 
-# def result(request):
-#     if request.method == 'POST':
-#         form = LoanForm(request.POST)
-
-#         if form.is_valid():
-#             applicant_income = form.cleaned_data['applicant_income']
-#             coapplicant_income = form.cleaned_data['coapplicant_income']
-#             loan_amount = form.cleaned_data['loan_amount']
-#             loan_term = form.cleaned_data['loan_term']
-#             credit_history = int(form.cleaned_data['credit_history'])
-
-#             input_data = np.array([
-#                 applicant_income,
-#                 coapplicant_income,
-#                 loan_amount,
-#                 loan_term,
-#                 credit_history
-#             ]).reshape(1, -1)
-
-#             # ✅ ML Prediction
-#             prediction = model.predict(input_data)[0]
-#             prediction_proba = model.predict_proba(input_data)[0][1]
-
-#             # ✅ Probability %
-#             probability = round(prediction_proba * 100, 2)
-
-#             # ✅ RISK LOGIC (THIS IS WHERE IT BELONGS)
-#             if probability > 80:
-#                 risk = "Low"
-#             elif probability >= 50:
-#                 risk = "Medium"
-#             else:
-#                 risk = "High"
-
-#             # ✅ Approval / Rejection Text
-#             if prediction == 1:
-#                 result_text = "Loan Approved (AI Prediction)"
-#             else:
-#                 result_text = "Loan Rejected (AI Prediction)"
-
-#             # ✅ Explainable AI
-#             explanation = generate_ai_explanation(
-#                 income=applicant_income,
-#                 loan_amount=loan_amount,
-#                 probability=prediction_proba
-#             )
-
-#             # ✅ Save History
-#             LoanHistory.objects.create(
-#                 user=request.user,
-#                 applicant_income=applicant_income,
-#                 coapplicant_income=coapplicant_income,
-#                 loan_amount=loan_amount,
-#                 loan_term=loan_term,
-#                 credit_history=credit_history,
-#                 ai_result=result_text,
-#                 probability=probability,
-#                 ai_explanation=explanation
-#             )
-
-#             # ✅ FINAL CONTEXT (USED BY result.html)
-#             context = {
-#                 "result": result_text,
-#                 "probability": probability,
-#                 "risk": risk
-#             }
-
-#             return render(request, "predictor/result.html", context)
-
-#     return redirect("home")
-
+# from .fraud_detection import detect_fraud
 
 # def result(request):
 #     if request.method == 'POST':
-#         form = LoanForm(request.POST)
+#         form = LoanForm(request.POST, request.FILES)
+#         document = request.FILES.get("document")
 
 #         if form.is_valid():
 #             applicant_income = form.cleaned_data['applicant_income']
@@ -128,37 +118,43 @@ def home(request):
 #             credit_history = int(form.cleaned_data['credit_history'])
 
 #             total_income = applicant_income + coapplicant_income
+            
+          
+            
 
-#             # ==============================
-#             # STEP 1: FRAUD DETECTION
-#             # ==============================
-#             fraud, reasons = detect_fraud(
-#                 total_income=total_income,
-#                 loan_amount=loan_amount
-#             )
+#             # 🔴 FRAUD CHECK
+#             fraud, reasons = detect_fraud(total_income, loan_amount)
 
+#             # =========================
+#             # 🚨 FRAUD CASE
+#             # =========================
 #             if fraud:
-#                 # Save fraud case (optional but impressive)
-#                 LoanHistory.objects.create(
+#                 LoanApplication.objects.create(
 #                     user=request.user,
 #                     applicant_income=applicant_income,
 #                     coapplicant_income=coapplicant_income,
 #                     loan_amount=loan_amount,
 #                     loan_term=loan_term,
 #                     credit_history=credit_history,
-#                     ai_result="Potential Fraud Detected",
+#                     document=document,
+#                     # ✅ safe values
 #                     probability=0,
-#                     ai_explanation="Application flagged for manual review due to suspicious patterns."
+#                     ai_explanation="Fraud detected",
+#                     fraud_reason=" | ".join(reasons),
+#                     status="REJECTED"
 #                 )
 
 #                 return render(request, "predictor/result.html", {
 #                     "fraud": True,
-#                     "fraud_reasons": reasons
+#                     "fraud_reasons": reasons,
+#                     "recommended_loan": round(recommended_loan, 2),
+#                     "emi": emi,
+#                     "interest_rate": interest_rate,
 #                 })
 
-#             # ==============================
-#             # STEP 2: ML PREDICTION
-#             # ==============================
+#             # =========================
+#             # 🤖 ML PREDICTION
+#             # =========================
 #             input_data = np.array([
 #                 applicant_income,
 #                 coapplicant_income,
@@ -167,126 +163,216 @@ def home(request):
 #                 credit_history
 #             ]).reshape(1, -1)
 
+#             model = load_active_model()
+
+#             if not model:
+#                 return render(request, "predictor/result.html", {
+#                     "error": "No active ML model found"
+#                 })
+
 #             prediction = model.predict(input_data)[0]
-#             prediction_proba = model.predict_proba(input_data)[0][1]
 
+#             prediction_proba = model.predict_proba(
+#                 input_data
+#             )[0][1]
 #             probability = round(prediction_proba * 100, 2)
+        
 
-#             # ==============================
-#             # RISK CALCULATION
-#             # ==============================
-#             if probability > 80:
-#                 risk = "Low"
-#             elif probability >= 50:
-#                 risk = "Medium"
+#             if probability >= 80:
+#                 recommended_loan = loan_amount
+
+#             elif probability >= 60:
+#                 recommended_loan = loan_amount * 0.8
+
 #             else:
-#                 risk = "High"
+#                 recommended_loan = loan_amount * 0.5
 
-#             # ==============================
-#             # RESULT TEXT
-#             # ==============================
-#             if prediction == 1:
-#                 result_text = "Loan Approved (AI Prediction)"
+#             recommended_loan = round(recommended_loan, 2)
+
+#             interest_rate = 8.5
+
+#             monthly_rate = interest_rate / 12 / 100
+
+#             months = loan_term
+
+#             emi = (
+#                 recommended_loan *
+#                 monthly_rate *
+#                 ((1 + monthly_rate) ** months)
+#             ) / (
+#                 ((1 + monthly_rate) ** months) - 1
+#             )
+
+#             emi = round(emi, 2)
+            
+#             uncertainty = ""
+
+#             if probability >= 85:
+#                 uncertainty = "Very confident prediction"
+
+#             elif probability >= 60:
+#                 uncertainty = "Moderately confident prediction"
+
 #             else:
-#                 result_text = "Loan Rejected (AI Prediction)"
+#                 uncertainty = "Prediction has higher uncertainty"
 
-#             # ==============================
-#             # EXPLAINABLE AI
-#             # ==============================
+#             risk = "Low" if probability > 80 else "Medium" if probability >= 50 else "High"
+
+#             result_text = "Loan Approved (AI Prediction)" if prediction == 1 else "Loan Rejected (AI Prediction)"
+#             confidence_width = probability
 #             explanation = generate_ai_explanation(
 #                 income=total_income,
 #                 loan_amount=loan_amount,
 #                 probability=prediction_proba
 #             )
 
-#             # ==============================
-#             # SAVE HISTORY
-#             # ==============================
-#             LoanHistory.objects.create(
+#             # ✅ SAVE CORRECT DATA
+#             LoanApplication.objects.create(
 #                 user=request.user,
 #                 applicant_income=applicant_income,
 #                 coapplicant_income=coapplicant_income,
 #                 loan_amount=loan_amount,
 #                 loan_term=loan_term,
 #                 credit_history=credit_history,
-#                 ai_result=result_text,
+#                 document=document,
 #                 probability=probability,
-#                 ai_explanation=explanation
+#                 ai_explanation=explanation,
+#                 fraud_reason=None,
+#                 status="AI_APPROVED" if prediction == 1 else "REJECTED"
 #             )
 
-#             # ==============================
-#             # FINAL CONTEXT
-#             # ==============================
-#             context = {
+#             return render(request, "predictor/result.html", {
 #                 "fraud": False,
 #                 "result": result_text,
 #                 "probability": probability,
-#                 "risk": risk
-#             }
+#                 "risk": risk,
+#                 "confidence_width": confidence_width,
+#                 "uncertainty": uncertainty,
+#                 "recommended_loan": round(recommended_loan, 2),
+#                 "emi": emi,
+#                 "interest_rate": interest_rate,
+#             })
 
-#             return render(request, "predictor/result.html", context)
-
-#     return redirect("home")
-   
-
-# def generate_ai_explanation(income, loan_amount, probability):
-#     reasons = []
-
-#     if income >= 5000:
-#         reasons.append("Income is sufficient (≥ ₹5,000)")
-#     else:
-#         reasons.append("Income is low")
-
-#     if loan_amount <= income * 20:
-#         reasons.append("Loan amount within safe limit")
-#     else:
-#         reasons.append("Loan amount is high compared to income")
-
-#     if probability >= 0.7:
-#         reasons.append(f"High approval probability ({round(probability*100)}%)")
-#     else:
-#         reasons.append(f"Low approval probability ({round(probability*100)}%)")
-
-#     return " | ".join(reasons)
+#     return redirect("index")
 
 from .fraud_detection import detect_fraud
+import numpy as np
+from django.shortcuts import render, redirect
 
 def result(request):
+
     if request.method == 'POST':
-        form = LoanForm(request.POST)
+
+        form = LoanForm(request.POST, request.FILES)
+
+        # uploaded document
+        document = request.FILES.get("document")
 
         if form.is_valid():
+
+            # =========================
+            # FORM DATA
+            # =========================
+
             applicant_income = form.cleaned_data['applicant_income']
-            coapplicant_income = form.cleaned_data['coapplicant_income'] or 0
+
+            coapplicant_income = (
+                form.cleaned_data['coapplicant_income'] or 0
+            )
+
             loan_amount = form.cleaned_data['loan_amount']
+
             loan_term = form.cleaned_data['loan_term']
-            credit_history = int(form.cleaned_data['credit_history'])
 
-            total_income = applicant_income + coapplicant_income
+            credit_history = int(
+                form.cleaned_data['credit_history']
+            )
 
-            # 🔴 FRAUD CHECK
-            fraud, reasons = detect_fraud(total_income, loan_amount)
+            total_income = (
+                applicant_income + coapplicant_income
+            )
+
+            # =========================
+            # DEFAULT RECOMMENDATION
+            # (used in fraud case too)
+            # =========================
+
+            # DEFAULT SMART RECOMMENDATION
+            recommended_loan = min(
+                total_income * 20,
+                loan_amount * 0.5
+            )
+
+            recommended_loan = round(recommended_loan, 2)
+
+            # =========================
+            # EMI CALCULATOR
+            # =========================
+
+            interest_rate = 8.5
+
+            monthly_rate = (
+                interest_rate / 12 / 100
+            )
+
+            months = loan_term
+
+            emi = (
+                recommended_loan *
+                monthly_rate *
+                ((1 + monthly_rate) ** months)
+            ) / (
+                ((1 + monthly_rate) ** months) - 1
+            )
+
+            emi = round(emi, 2)
+
+            # =========================
+            # FRAUD CHECK
+            # =========================
+
+            fraud, reasons = detect_fraud(
+                total_income,
+                loan_amount
+            )
+
+            # =========================
+            # FRAUD CASE
+            # =========================
 
             if fraud:
-                LoanHistory.objects.create(
+
+                LoanApplication.objects.create(
                     user=request.user,
                     applicant_income=applicant_income,
                     coapplicant_income=coapplicant_income,
                     loan_amount=loan_amount,
                     loan_term=loan_term,
                     credit_history=credit_history,
-                    ai_result="Potential Fraud Detected",
+                    document=document,
+
                     probability=0,
-                    ai_explanation=" | ".join(reasons),
-                    is_fraud=True  
+                    ai_explanation="Fraud detected",
+                    fraud_reason=" | ".join(reasons),
+                    status="REJECTED"
                 )
 
-                return render(request, "predictor/result.html", {
-                    "fraud": True,
-                    "fraud_reasons": reasons
-                })
+                return render(
+                    request,
+                    "predictor/result.html",
+                    {
+                        "fraud": True,
+                        "fraud_reasons": reasons,
+                        "recommended_loan": round(recommended_loan, 2),
+                        "emi": emi,
+                        "interest_rate": interest_rate,
+                    }
+                )
 
-            # ✅ ML PREDICTION
+            # =========================
+            # ML PREDICTION
+            # =========================
+
             input_data = np.array([
                 applicant_income,
                 coapplicant_income,
@@ -295,13 +381,125 @@ def result(request):
                 credit_history
             ]).reshape(1, -1)
 
-            prediction = model.predict(input_data)[0]
-            prediction_proba = model.predict_proba(input_data)[0][1]
-            probability = round(prediction_proba * 100, 2)
+            model = load_active_model()
 
-            risk = "Low" if probability > 80 else "Medium" if probability >= 50 else "High"
+            if not model:
 
-            result_text = "Loan Approved (AI Prediction)" if prediction == 1 else "Loan Rejected (AI Prediction)"
+                return render(
+                    request,
+                    "predictor/result.html",
+                    {
+                        "error": "No active ML model found"
+                    }
+                )
+
+            prediction = model.predict(
+                input_data
+            )[0]
+
+            prediction_proba = model.predict_proba(
+                input_data
+            )[0][1]
+
+            probability = round(
+                prediction_proba * 100,
+                2
+            )
+
+            # =========================
+            # SMART LOAN RECOMMENDATION
+            # =========================
+
+            if probability >= 80:
+
+                recommended_loan = loan_amount
+
+            elif probability >= 60:
+
+                recommended_loan = loan_amount * 0.8
+
+            else:
+
+                recommended_loan = min(total_income * 20, loan_amount * 0.5)
+
+            recommended_loan = round(
+                recommended_loan,
+                2
+            )
+
+            # =========================
+            # UPDATED EMI
+            # =========================
+
+            emi = (
+                recommended_loan *
+                monthly_rate *
+                ((1 + monthly_rate) ** months)
+            ) / (
+                ((1 + monthly_rate) ** months) - 1
+            )
+
+            emi = round(emi, 2)
+
+            # =========================
+            # CONFIDENCE
+            # =========================
+
+            if probability >= 85:
+
+                uncertainty = (
+                    "Very confident prediction"
+                )
+
+            elif probability >= 60:
+
+                uncertainty = (
+                    "Moderately confident prediction"
+                )
+
+            else:
+
+                uncertainty = (
+                    "Prediction has higher uncertainty"
+                )
+
+            # =========================
+            # RISK LEVEL
+            # =========================
+
+            if probability > 80:
+
+                risk = "Low"
+
+            elif probability >= 50:
+
+                risk = "Medium"
+
+            else:
+
+                risk = "High"
+
+            # =========================
+            # RESULT TEXT
+            # =========================
+
+            if prediction == 1:
+
+                result_text = (
+                    "Loan Approved (AI Prediction)"
+                )
+
+            else:
+
+                result_text = (
+                    "Loan Rejected (AI Prediction)"
+                )
+
+            confidence_width = probability
+
+            # =========================
+            # AI EXPLANATION
+            # =========================
 
             explanation = generate_ai_explanation(
                 income=total_income,
@@ -309,27 +507,53 @@ def result(request):
                 probability=prediction_proba
             )
 
-            LoanHistory.objects.create(
+            # =========================
+            # SAVE TO DATABASE
+            # =========================
+
+            LoanApplication.objects.create(
                 user=request.user,
                 applicant_income=applicant_income,
                 coapplicant_income=coapplicant_income,
                 loan_amount=loan_amount,
                 loan_term=loan_term,
                 credit_history=credit_history,
-                ai_result=result_text,
+                document=document,
+
                 probability=probability,
                 ai_explanation=explanation,
-                is_fraud=False  # ✅ NORMAL CASE
+                fraud_reason=None,
+
+                status=(
+                    "AI_APPROVED"
+                    if prediction == 1
+                    else "REJECTED"
+                )
             )
 
-            return render(request, "predictor/result.html", {
-                "fraud": False,
-                "result": result_text,
-                "probability": probability,
-                "risk": risk
-            })
+            # =========================
+            # RESULT PAGE
+            # =========================
 
-    return redirect("home")
+            return render(
+                request,
+                "predictor/result.html",
+                {
+                    "fraud": False,
+                    "result": result_text,
+                    "probability": probability,
+                    "risk": risk,
+                    "confidence_width": confidence_width,
+                    "uncertainty": uncertainty,
+
+                    "recommended_loan": recommended_loan,
+
+                    "emi": emi,
+                    "interest_rate": interest_rate,
+                }
+            )
+
+    return redirect("index")
 
 from django.contrib.auth.decorators import login_required
 
@@ -338,7 +562,7 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 def history(request):
-    records = LoanHistory.objects.filter(
+    records = LoanApplication.objects.filter(
         user=request.user
     ).order_by('-created_at')
 
@@ -350,7 +574,7 @@ def history(request):
 
     # ===== STATUS FILTER =====
     if status:
-        records = records.filter(admin_decision=status)
+        records = records.filter(status=status)
 
     # ===== DATE RANGE FILTER =====
     from datetime import datetime, timedelta
@@ -404,24 +628,8 @@ def register(request):
 
 
 
-# def user_login(request):
-#     if request.method == 'POST':
-#         username = request.POST['username']
-#         password = request.POST['password']
 
-#         user = authenticate(request, username=username, password=password)
-#         if user:
-#             login(request, user)
-#             print(request.user.is_authenticated)
 
-#             return redirect('home')
-#         else:
-#             return render(request, 'predictor/login.html', {'error': 'Invalid credentials'})
-
-#     return render(request, 'predictor/login.html')
-
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
 
 
 from django.contrib.auth import authenticate, login
@@ -443,7 +651,7 @@ def user_login(request):
             elif user.is_staff:
                 return redirect("admin_dashboard")
             else:
-                return redirect("home")
+                return redirect("index")
 
         return render(request, "predictor/login.html", {
             "error": "Invalid credentials"
@@ -463,7 +671,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 @staff_member_required
 def admin_dashboard(request):
-    applications = LoanHistory.objects.all().order_by('-created_at')
+    applications = LoanApplication.objects.all().order_by('-created_at')
     return render(request, 'predictor/admin_dashboard.html', {
         'applications': applications
     })
@@ -471,7 +679,7 @@ def admin_dashboard(request):
 
 @staff_member_required
 def update_loan_status(request, loan_id, decision):
-    loan = LoanHistory.objects.get(id=loan_id)
+    loan = LoanApplication.objects.get(id=loan_id)
     loan.admin_decision = decision
     loan.save()
     return redirect('admin_dashboard')
@@ -481,16 +689,18 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 @staff_member_required
 def approve_loan(request, loan_id):
-    loan = get_object_or_404(LoanHistory, id=loan_id)
-    loan.admin_decision = 'Approved'
+    loan = get_object_or_404(LoanApplication, id=loan_id)
+    loan.status = 'ADMIN_APPROVED'
+    loan.admin = request.user
     loan.save()
     return redirect('admin_dashboard')
 
 
 @staff_member_required
 def reject_loan(request, loan_id):
-    loan = get_object_or_404(LoanHistory, id=loan_id)
-    loan.admin_decision = 'Rejected'
+    loan = get_object_or_404(LoanApplication, id=loan_id)
+    loan.status = 'REJECTED'
+    loan.admin = request.user
     loan.save()
     return redirect('admin_dashboard')
 
@@ -504,69 +714,177 @@ def reject_loan(request, loan_id):
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.timezone import now
 from datetime import timedelta
-from .models import LoanHistory
+
 
 @staff_member_required
 def admin_dashboard(request):
-    applications = LoanHistory.objects.all().order_by('-id')
+
+    applications = LoanApplication.objects.all().order_by('-id')
 
     total = applications.count()
 
-    ai_approved = applications.filter(ai_result__icontains='Approved').count()
-    admin_approved = applications.filter(admin_decision='Approved').count()
-    rejected = applications.filter(admin_decision='Rejected').count()
+    # =========================
+    # APPROVAL STATS
+    # =========================
 
-    ai_percent = round((ai_approved / total) * 100, 2) if total else 0
-    admin_percent = round((admin_approved / total) * 100, 2) if total else 0
-    reject_percent = round((rejected / total) * 100, 2) if total else 0
+    ai_approved = applications.filter(
+        status='AI_APPROVED'
+    ).count()
 
-    # 📈 Last 7 days approval trend (FIXED)
+    admin_approved = applications.filter(
+        status='ADMIN_APPROVED'
+    ).count()
+
+    rejected = applications.filter(
+        status='REJECTED'
+    ).count()
+
+    ai_percent = round(
+        (ai_approved / total) * 100,
+        2
+    ) if total else 0
+
+    admin_percent = round(
+        (admin_approved / total) * 100,
+        2
+    ) if total else 0
+
+    reject_percent = round(
+        (rejected / total) * 100,
+        2
+    ) if total else 0
+
+
+    # =========================
+    # FRAUD ANALYSIS
+    # =========================
+
+    fraud_cases = applications.filter(
+        fraud_reason__isnull=False
+    ).exclude(
+        fraud_reason=""
+    ).count()
+
+    normal_cases = total - fraud_cases
+
+
+    # =========================
+    # LOAN DISTRIBUTION
+    # =========================
+
+    small_loans = applications.filter(
+        loan_amount__lt=100000
+    ).count()
+
+    medium_loans = applications.filter(
+        loan_amount__gte=100000,
+        loan_amount__lt=500000
+    ).count()
+
+    large_loans = applications.filter(
+        loan_amount__gte=500000
+    ).count()
+
+
+    # =========================
+    # LAST 7 DAYS TREND
+    # =========================
+
     last_7_days = []
+
     approvals = []
 
     for i in range(6, -1, -1):
+
         day = now().date() - timedelta(days=i)
 
         count = applications.filter(
-            admin_decision='Approved',
+            status='ADMIN_APPROVED',
             created_at__date=day
         ).count()
 
-        last_7_days.append(day.strftime('%d %b'))
+        last_7_days.append(
+            day.strftime('%d %b')
+        )
+
         approvals.append(count)
 
+
+    # =========================
+    # AI EXPLANATIONS
+    # =========================
+
     for app in applications:
+
         if app.ai_explanation:
-            app.explanation_list = app.ai_explanation.split(" | ")
+
+            app.explanation_list = (
+                app.ai_explanation.split(" | ")
+            )
+
         else:
+
             app.explanation_list = []
 
+
+    # =========================
+    # CONTEXT
+    # =========================
+
     context = {
+
         'applications': applications,
+
         'total': total,
+
         'ai_percent': ai_percent,
+
         'admin_percent': admin_percent,
+
         'reject_percent': reject_percent,
+
         'days': last_7_days,
+
         'approvals': approvals,
+
+        # ⭐ NEW
+        'fraud_cases': fraud_cases,
+
+        'normal_cases': normal_cases,
+
+        'small_loans': small_loans,
+
+        'medium_loans': medium_loans,
+
+        'large_loans': large_loans,
     }
 
-    return render(request, 'predictor/admin_dashboard.html', context)
+    return render(
+        request,
+        'predictor/admin_dashboard.html',
+        context
+    )
 
 
 
 from django.shortcuts import redirect, get_object_or_404
-from .models import LoanHistory
 
+
+
+from django.shortcuts import get_object_or_404, redirect
 
 def admin_decision(request, pk, decision):
-    application = get_object_or_404(LoanHistory, pk=pk)
+    application = get_object_or_404(LoanApplication, pk=pk)
 
     if request.method == 'POST':
+
         if decision == 'approve':
-            application.admin_decision = 'Approved'
+            application.status = 'ADMIN_APPROVED'
+            application.admin = request.user
+
         elif decision == 'reject':
-            application.admin_decision = 'Rejected'
+            application.status = 'REJECTED'
+            application.admin = request.user
 
         application.save()
 
@@ -607,7 +925,9 @@ def upload_model(request):
         MLModel.objects.create(
             file=model_file,
             uploaded_by=request.user,
-            is_active=True
+            is_active=True,
+            version=f"v{MLModel.objects.count() + 1}",
+            accuracy=95.2
         )
 
         # log activity
@@ -627,7 +947,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 @staff_member_required
 def admin_history(request):
-    records = LoanHistory.objects.select_related('user').order_by('-created_at')
+    records = LoanApplication.objects.select_related('user').order_by('-created_at')
     return render(request, 'predictor/admin_history.html', {
         'records': records
     })
@@ -641,7 +961,7 @@ def superuser_required(user):
 
 @user_passes_test(superuser_required)
 def superuser_history(request):
-    records = LoanHistory.objects.select_related('user').order_by('-created_at')
+    records = LoanApplication.objects.select_related('user').order_by('-created_at')
 
     return render(
         request,
@@ -670,15 +990,15 @@ def export_csv(request):
         'Date'
     ])
 
-    applications = LoanHistory.objects.all().order_by('-id')
+    applications = LoanApplication.objects.all().order_by('-id')
 
     for app in applications:
         writer.writerow([
             app.user.username if app.user else 'N/A',
             app.loan_amount,
-            app.ai_result,
+            app.status,
             f"{round(app.probability, 2)}%",
-            app.admin_decision,
+            
             app.created_at.strftime("%Y-%m-%d")
         ])
 
@@ -688,7 +1008,7 @@ from fpdf import FPDF
 
 @staff_member_required
 def export_pdf(request):
-    applications = LoanHistory.objects.all().order_by('-id')
+    applications = LoanApplication.objects.all().order_by('-id')
 
     pdf = FPDF()
     pdf.add_page()
@@ -709,11 +1029,11 @@ def export_pdf(request):
     for app in applications:
         pdf.cell(31, 8, app.user.username if app.user else 'N/A', 1)
         pdf.cell(31, 8, str(app.loan_amount), 1)
-        clean_result = app.ai_result.replace("(AI Prediction)", "").strip()
+        clean_result = app.status.replace("(AI Prediction)", "").strip()
         pdf.cell(31, 8, clean_result, 1)
 
         pdf.cell(31, 8, f"{round(app.probability, 2)}%", 1)
-        pdf.cell(31, 8, app.admin_decision, 1)
+        
         pdf.cell(31, 8, app.created_at.strftime('%d-%m-%Y'), 1)
         pdf.ln()
 
@@ -729,40 +1049,98 @@ def export_pdf(request):
 
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .utils import is_super_admin
-from .models import MLModel, LoanHistory, AuditLog
+from .models import MLModel,AuditLog
 
 @login_required
 @user_passes_test(is_super_admin)
 def superadmin_dashboard(request):
-    active_model = MLModel.objects.filter(is_active=True).first()
+
+    active_model = MLModel.objects.filter(
+        is_active=True
+    ).first()
+
+    models = MLModel.objects.all().order_by(
+        '-uploaded_at'
+    )
 
     context = {
+
         "active_model": active_model,
-        "total_predictions": LoanHistory.objects.count(),
-        "ai_decisions": LoanHistory.objects.filter(admin_decision__isnull=True).count(),
-        "admin_decisions": LoanHistory.objects.filter(admin_decision__isnull=False).count(),
-        "recent_logs": AuditLog.objects.order_by("-timestamp")[:5],
+
+        "models": models,
+
+        "total_predictions":
+            LoanApplication.objects.count(),
+
+        "ai_decisions": LoanApplication.objects.exclude(
+                probability=0
+        ).count(),
+
+        "admin_decisions":
+            LoanApplication.objects.filter(
+                status='ADMIN_APPROVED'
+            ).count(),
+
+        "recent_logs":
+            AuditLog.objects.order_by(
+                "-timestamp"
+            )[:5],
     }
 
-    return render(request, "predictor/superadmin_dashboard.html", context)
+    return render(
+        request,
+        "predictor/superadmin_dashboard.html",
+        context
+    )
 
+@login_required
+@user_passes_test(is_super_admin)
+def activate_model(request, model_id):
+
+    model = get_object_or_404(
+        MLModel,
+        id=model_id
+    )
+
+    # deactivate all
+    MLModel.objects.update(
+        is_active=False
+    )
+
+    # activate selected
+    model.is_active = True
+    model.save()
+
+    # audit log
+    AuditLog.objects.create(
+        user=request.user,
+        action=f"Activated model: {model.version}"
+    )
+
+    return redirect("superadmin_dashboard")
 
 
 @login_required
 @user_passes_test(is_super_admin)
 def system_history(request):
-    logs = AuditLog.objects.order_by('-timestamp')
+
+    logs = AuditLog.objects.order_by(
+        '-timestamp'
+    )
+
     return render(
         request,
-        'predictor/superuser_history.html',
-        {'logs': logs}
+        'predictor/system_history.html',
+        {
+            'records': logs
+        }
     )
 
 
-from django.shortcuts import render
+# from django.shortcuts import render
 
-def index(request):
-    return render(request, 'predictor/index.html')
+# def index(request):
+#     return render(request, 'predictor/index.html')
 
 
 from django.shortcuts import render
@@ -770,30 +1148,72 @@ from .forms import LoanForm
 from .fraud_detection import detect_fraud
 from .loan_approval import check_loan_eligibility
 
-
+import os
+from django.conf import settings
 
 
 
 def loan_form(request):
+
     form = LoanForm()
     context = {"form": form}
 
     if request.method == "POST":
-        form = LoanForm(request.POST)
+
+        # ✅ IMPORTANT
+        form = LoanForm(request.POST, request.FILES)
 
         if form.is_valid():
-            # Get cleaned data
-            applicant_income = form.cleaned_data["applicant_income"]
-            coapplicant_income = form.cleaned_data["coapplicant_income"] or 0
-            loan_amount = form.cleaned_data["loan_amount"]
-            credit_history = int(form.cleaned_data["credit_history"])
-            loan_term = form.cleaned_data["loan_term"]
-
-            # Total income
-            total_income = applicant_income + coapplicant_income
 
             # -----------------------------
-            # STEP 1: Fraud Detection
+            # GET FORM DATA
+            # -----------------------------
+            applicant_income = form.cleaned_data["applicant_income"]
+
+            coapplicant_income = (
+                form.cleaned_data["coapplicant_income"] or 0
+            )
+
+            loan_amount = form.cleaned_data["loan_amount"]
+
+            credit_history = int(
+                form.cleaned_data["credit_history"]
+            )
+
+            loan_term = form.cleaned_data["loan_term"]
+
+            # ✅ DOCUMENT FILE
+            document = form.cleaned_data.get("document")
+
+            # Total income
+            total_income = (
+                applicant_income + coapplicant_income
+            )
+
+            # -----------------------------
+            # SAVE DOCUMENT
+            # -----------------------------
+            if document:
+
+                
+
+                upload_path = os.path.join(
+                    settings.MEDIA_ROOT,
+                    "documents",
+                    document.name
+                )
+
+                os.makedirs(
+                    os.path.dirname(upload_path),
+                    exist_ok=True
+                )
+
+                with open(upload_path, "wb+") as destination:
+                    for chunk in document.chunks():
+                        destination.write(chunk)
+
+            # -----------------------------
+            # STEP 1: FRAUD DETECTION
             # -----------------------------
             fraud, reasons = detect_fraud(
                 total_income,
@@ -801,13 +1221,16 @@ def loan_form(request):
             )
 
             if fraud:
+
                 context.update({
                     "fraud": True,
                     "fraud_reasons": reasons
                 })
+
             else:
+
                 # -----------------------------
-                # STEP 2: Loan Approval
+                # STEP 2: LOAN APPROVAL
                 # -----------------------------
                 status, message = check_loan_eligibility(
                     total_income,
@@ -822,4 +1245,191 @@ def loan_form(request):
                     "message": message
                 })
 
-    return render(request, "predictor/loan_form.html", context)
+    return render(
+        request,
+        "predictor/loan_form.html",
+        context
+    )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def predict_loan_api(request):
+
+    applicant_income = float(
+        request.data.get('applicant_income')
+    )
+
+    coapplicant_income = float(
+        request.data.get('coapplicant_income')
+    )
+
+    loan_amount = float(
+        request.data.get('loan_amount')
+    )
+
+    loan_term = int(
+        request.data.get('loan_term')
+    )
+
+    credit_history = int(
+        request.data.get('credit_history')
+    )
+
+
+    # =========================
+    # LOAD MODEL
+    # =========================
+
+    active_model = MLModel.objects.filter(
+        is_active=True
+    ).first()
+
+    if not active_model:
+
+        return Response({
+
+            'error': 'No active ML model found'
+
+        })
+
+
+    with open(active_model.file.path, 'rb') as file:
+
+        model = pickle.load(file)
+
+
+    # =========================
+    # PREDICTION
+    # =========================
+
+    features = [[
+
+        applicant_income,
+        coapplicant_income,
+        loan_amount,
+        loan_term,
+        credit_history
+
+    ]]
+
+    prediction = model.predict(features)[0]
+
+    probability = round(
+
+        model.predict_proba(features)[0][1] * 100,
+
+        2
+    )
+
+    result = (
+        "Approved"
+        if prediction == 1
+        else "Rejected"
+    )
+
+
+    return Response({
+
+        'prediction': result,
+
+        'probability': probability,
+
+        'risk': (
+            'Low'
+            if probability > 80
+            else 'Medium'
+            if probability >= 50
+            else 'High'
+        )
+    })
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def loan_history_api(request):
+
+    loans = LoanApplication.objects.all().order_by('-id')
+
+    serializer = LoanApplicationSerializer(
+        loans,
+        many=True
+    )
+
+    return Response(serializer.data)
+
+
+
+def chatbot(request):
+
+    if request.method == "POST":
+
+        data = json.loads(request.body)
+
+        message = data.get("message", "").lower()
+
+        response = "Sorry, I didn't understand."
+
+        # GREETING
+        if (
+            "hello" in message or
+            "hi" in message or
+            "hlo" in message or
+            "hey" in message
+        ):
+
+            response = (
+                "Hello 👋 Welcome to Loan Predictor!"
+            )
+
+        # LOAN
+        elif "loan" in message:
+
+            response = (
+                "Loan approval depends on income, "
+                "credit history, loan amount, "
+                "and fraud detection."
+            )
+
+        # APPROVAL
+        elif "approved" in message:
+
+            response = (
+                "Higher income and good credit "
+                "history increase approval chances."
+            )
+
+        # REJECTION
+        elif "rejected" in message:
+
+            response = (
+                "Loan may be rejected because of "
+                "low income, high loan amount, "
+                "or poor credit history."
+            )
+
+        # EMI
+        elif "emi" in message:
+
+            response = (
+                "EMI depends on loan amount, "
+                "interest rate, and loan term."
+            )
+
+        # DOCUMENTS
+        elif (
+            "document" in message or
+            "documents" in message
+        ):
+
+            response = (
+                "Upload Aadhaar, PAN card, "
+                "or salary slip."
+            )
+
+        return JsonResponse({
+            "response": response
+        })
+
+    return JsonResponse({
+        "response": "Invalid request"
+    })

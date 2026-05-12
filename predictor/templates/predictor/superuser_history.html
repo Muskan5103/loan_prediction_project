@@ -21,7 +21,7 @@
                         <th>Income</th>
                         <th>Loan</th>
                         <th>AI Result</th>
-                        <th>Admin Decision</th>
+                        <th>Final Status</th>
                         <th>Probability</th>
                         <th>Risk</th>
                     </tr>
@@ -30,14 +30,15 @@
                 <tbody>
                 {% for r in records %}
                     <tr class="text-center">
+
                         <td>{{ r.user.username }}</td>
                         <td>{{ r.created_at|date:"d M Y, H:i" }}</td>
                         <td>₹ {{ r.applicant_income }}</td>
                         <td>₹ {{ r.loan_amount }}</td>
 
-                        <!-- AI RESULT -->
+                        <!-- 🤖 AI RESULT -->
                         <td>
-                            {% if "Approved" in r.ai_result %}
+                            {% if r.status == "AI_APPROVED" or r.status == "ADMIN_APPROVED" %}
                                 <span class="text-success fw-bold">
                                     🤖 Approved
                                 </span>
@@ -48,20 +49,26 @@
                             {% endif %}
                         </td>
 
-                        <!-- ADMIN DECISION -->
+                        <!-- 👮 FINAL STATUS -->
                         <td>
-                            {% if r.admin_decision == "Approved" %}
-                                <span class="badge bg-success">Approved</span>
-                            {% elif r.admin_decision == "Rejected" %}
+                            {% if r.status == "ADMIN_APPROVED" %}
+                                <span class="badge bg-success">Admin Approved</span>
+
+                            {% elif r.status == "AI_APPROVED" %}
+                                <span class="badge bg-info text-dark">AI Approved</span>
+
+                            {% elif r.status == "REJECTED" %}
                                 <span class="badge bg-danger">Rejected</span>
+
                             {% else %}
                                 <span class="badge bg-secondary">Pending</span>
                             {% endif %}
                         </td>
 
+                        <!-- 📊 PROBABILITY -->
                         <td>{{ r.probability }}%</td>
 
-                        <!-- RISK -->
+                        <!-- ⚠️ RISK -->
                         <td>
                             {% if r.probability > 80 %}
                                 <span class="badge bg-success">Low</span>
@@ -71,6 +78,7 @@
                                 <span class="badge bg-danger">High</span>
                             {% endif %}
                         </td>
+
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -84,8 +92,8 @@
         {% endif %}
 
         <div class="text-center mt-3">
-            <a href="{% url 'home' %}" class="btn btn-secondary">
-                ⬅ Back
+            <a href="{% url 'superadmin_dashboard' %}" class="btn btn-secondary">
+                ⬅ Back to Dashboard
             </a>
         </div>
 

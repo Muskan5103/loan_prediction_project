@@ -7,25 +7,25 @@
 <h2 class="mb-4">🧑‍💼 Bank Officer Dashboard</h2>
 
 <div class="stats-grid">
-  <div class="card">
-    📄 Total Applications <br>
-    <b>{{ total }}</b>
-  </div>
+    <div class="card co">
+        📄 Total Applications <br>
+        <b>{{ total }}</b>
+    </div>
 
-  <div class="card">
-    🤖 AI Approval % <br>
-    <b>{{ ai_percent }}%</b>
-  </div>
+    <div class="card co">
+        🤖 AI Approval % <br>
+        <b>{{ ai_percent }}%</b>
+    </div>
 
-  <div class="card">
-    👮 Admin Approval % <br>
-    <b>{{ admin_percent }}%</b>
-  </div>
+    <div class="card co">
+        👮 Admin Approval % <br>
+        <b>{{ admin_percent }}%</b>
+    </div>
 
-  <div class="card">
-    ❌ Rejection Rate <br>
-    <b>{{ reject_percent }}%</b>
-  </div>
+    <div class="card co">
+        ❌ Rejection Rate <br>
+        <b>{{ reject_percent }}%</b>
+    </div>
 </div>
 <div class="export-section">
     <h3>📤 Export Loan Reports</h3>
@@ -41,112 +41,374 @@
     </div>
 </div>
 
+<!-- =========================
+     API ACCESS PANEL
+========================= -->
 
+<div class="api-section mt-5">
+
+    <h3 class="text-center mb-4">
+        🌐 API Integration Panel
+    </h3>
+
+    <div class="api-buttons">
+
+        <!-- Predict API -->
+        <a href="{% url 'predict_loan_api' %}" target="_blank">
+
+            <button class="api-btn predict-api">
+
+                🤖 Predict Loan API
+
+            </button>
+
+        </a>
+
+        <!-- History API -->
+        <a href="{% url 'loan_history_api' %}" target="_blank">
+
+            <button class="api-btn history-api">
+
+                📜 Loan History API
+
+            </button>
+
+        </a>
+
+    </div>
+
+</div>
 
 <div class="table-responsive">
-<table class="table table-bordered table-striped align-middle">
-    <thead class="table-dark text-center">
-        <tr>
-            <th>User</th>
-            <th>Loan Amount</th>
-            <th>AI Result</th>
-            <th>AI Explanation</th>
+    <table class="table table-bordered table-striped align-middle">
+        <thead class="table-dark text-center">
+            <tr>
+                <th>User</th>
+                <th>Loan Amount</th>
+                <th>AI Result</th>
+                <th>AI Explanation</th>
 
-            <th>Probability</th>
-            <th>Fraud</th>
+                <th>Probability</th>
+                <th>Fraud</th>
 
-            <th>Admin Decision</th>
-            <th>Action</th>
-        </tr>
-    </thead>
+                <th>Admin Decision</th>
+                <th>Action</th>
+                <th>Document</th>
+            </tr>
+        </thead>
 
-    <tbody>
-{% for app in applications %}
-<tr class="text-center">
-    <td>{{ app.user.username }}</td>
-    <td>₹ {{ app.loan_amount }}</td>
-   <td>
-    {{ app.ai_result|cut:"(AI Prediction)" }}
-</td>
+        <tbody>
+            {% for app in applications %}
+            <tr class="text-center">
+                <td>{{ app.user.username }}</td>
+                <td>₹ {{ app.loan_amount }}</td>
+                <td>
+                    {% if app.status == "AI_APPROVED" or app.status == "ADMIN_APPROVED" %}
+                    <span class="text-success fw-bold">
+                        🤖 Approved (AI)
+                    </span>
+                    {% elif app.status == "REJECTED" %}
+                    <span class="text-danger fw-bold">
+                        🤖 Rejected (AI)
+                    </span>
+                    {% else %}
+                    <span class="text-warning fw-bold">
+                        🤖 Pending
+                    </span>
+                    {% endif %}
+                </td>
 
-    <td>
-  <ul style="padding-left:15px">
-    {% for reason in app.explanation_list %}
-      <li>{{ reason }}</li>
-    {% empty %}
-      <li>No explanation</li>
-    {% endfor %}
-  </ul>
-</td>
+                <td>
+                    <ul style="padding-left:15px">
+                        {% for reason in app.explanation_list %}
+                        <li>{{ reason }}</li>
+                        {% empty %}
+                        <li>No explanation</li>
+                        {% endfor %}
+                    </ul>
+                </td>
 
 
-    <td>{{ app.probability }}%</td>
+                <td>{{ app.probability }}%</td>
+                <td>
+                    {% if app.is_fraud %}
+                    <span class="badge bg-danger">🚨 Fraud</span>
+                    {% else %}
+                    <span class="badge bg-success">✅ Normal</span>
+                    {% endif %}
+                </td>
+
+
+                <!-- Admin Decision -->
+                <td>
+                    {% if app.status == 'ADMIN_APPROVED' %}
+                    <span class="badge bg-success">Approved</span>
+
+                    {% elif app.status == 'REJECTED' %}
+                    <span class="badge bg-danger">Rejected</span>
+
+                    {% elif app.status == 'AI_APPROVED' %}
+                    <span class="badge bg-warning">Pending</span>
+
+                    {% else %}
+                    <span class="badge bg-secondary">Pending</span>
+                    {% endif %}
+                </td>
+
+                <!-- Actions -->
+                <td>
+                    {% if app.status == 'AI_APPROVED' %}
+
+                    <form method="post" action="{% url 'admin_decision' app.id 'approve' %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                    </form>
+
+                    <form method="post" action="{% url 'admin_decision' app.id 'reject' %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                    </form>
+
+                    {% else %}
+                    <span class="text-muted">Decision Taken</span>
+                    {% endif %}
+                </td>
 <td>
-  {% if app.is_fraud %}
-    <span class="badge bg-danger">🚨 Fraud</span>
-  {% else %}
-    <span class="badge bg-success">✅ Normal</span>
-  {% endif %}
-</td>
-
-
-    <!-- Admin Decision -->
-    <td>
-        {% if app.admin_decision == 'Approved' %}
-            <span class="badge bg-success">Approved</span>
-        {% elif app.admin_decision == 'Rejected' %}
-            <span class="badge bg-danger">Rejected</span>
-        {% else %}
-            <span class="badge bg-warning">Pending</span>
-        {% endif %}
-    </td>
-
-    <!-- Actions -->
-    <td>
-    {% if app.admin_decision == 'Pending' %}
-        <form method="post" action="{% url 'admin_decision' app.id 'approve' %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-success">Approve</button>
-        </form>
-
-        <form method="post" action="{% url 'admin_decision' app.id 'reject' %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-danger">Reject</button>
-        </form>
+    {% if app.document %}
+        <a href="{{ app.document.url }}" target="_blank">
+            View File
+        </a>
     {% else %}
-        <span class="text-muted">Decision Taken</span>
+        No File
     {% endif %}
 </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center text-muted">
+                    No loan applications found
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
 
-</tr>
-{% empty %}
-<tr>
-    <td colspan="6" class="text-center text-muted">
-        No loan applications found
-    </td>
-</tr>
-{% endfor %}
-</tbody>
-
-</table>
+    </table>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <canvas id="approvalChart" height="120"></canvas>
 <script>
-const ctx = document.getElementById('approvalChart');
+    const ctx = document.getElementById('approvalChart');
 
-new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: {{ days|safe }},
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ days| safe }},
         datasets: [{
             label: 'Applications',
-            data: {{ approvals|safe }},
-            tension: 0.4,
-            borderWidth: 2
+            data: {{ approvals| safe }},
+        tension: 0.4,
+        borderWidth: 2
         }]
     }
 });
 </script>
+<script>
 
+    window.onload = function () {
+
+        /* =========================
+           APPROVAL DISTRIBUTION
+        ========================= */
+
+        new Chart(
+            document.getElementById('distributionChart'),
+
+            {
+                type: 'doughnut',
+
+                data: {
+
+                    labels: [
+                        'AI Approved',
+                        'Admin Approved',
+                        'Rejected'
+                    ],
+
+                    datasets: [{
+
+                        data: [
+                            Number("{{ ai_percent }}"),
+                            Number("{{ admin_percent }}"),
+                            Number("{{ reject_percent }}")
+                        ],
+
+                        backgroundColor: [
+                            '#22c55e',
+                            '#3b82f6',
+                            '#ef4444'
+                        ]
+                    }]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            }
+        );
+
+
+        /* =========================
+           FRAUD ANALYSIS
+        ========================= */
+
+        new Chart(
+            document.getElementById('fraudChart'),
+
+            {
+                type: 'pie',
+
+                data: {
+
+                    labels: [
+                        'Fraud',
+                        'Normal'
+                    ],
+
+                    datasets: [{
+
+                        data: [
+                            Number("{{ fraud_cases }}"),
+                            Number("{{ normal_cases }}")
+                        ],
+
+                        backgroundColor: [
+                            '#ef4444',
+                            '#22c55e'
+                        ]
+                    }]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            }
+        );
+
+
+        /* =========================
+           LOAN DISTRIBUTION
+        ========================= */
+
+        new Chart(
+            document.getElementById('loanChart'),
+
+            {
+                type: 'bar',
+
+                data: {
+
+                    labels: [
+                        'Small',
+                        'Medium',
+                        'Large'
+                    ],
+
+                    datasets: [{
+
+                        label: 'Loans',
+
+                        data: [
+                            Number("{{ small_loans }}"),
+                            Number("{{ medium_loans }}"),
+                            Number("{{ large_loans }}")
+                        ],
+
+                        backgroundColor: [
+                            '#22c55e',
+                            '#facc15',
+                            '#ef4444'
+                        ]
+                    }]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            }
+        );
+
+    };
+
+</script>
+<!-- =========================
+     ADVANCED ANALYTICS
+========================= -->
+<h3 class="mt-5 mb-4 text-center analytics-title">
+
+    📊 AI Loan Analytics Dashboard
+
+</h3>
+<div class="row mt-5">
+
+    <!-- APPROVAL DISTRIBUTION -->
+    <div class="col-md-4 mb-4">
+
+        <div class="card chart-card">
+
+            <div class="card-header chart-header">
+                📊 Approval Distribution
+            </div>
+
+            <div class="card-body">
+
+                <canvas id="distributionChart" height="250"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FRAUD ANALYSIS -->
+    <div class="col-md-4 mb-4">
+
+        <div class="card chart-card">
+
+            <div class="card-header chart-header">
+                🚨 Fraud Analysis
+            </div>
+
+            <div class="card-body">
+
+                <canvas id="fraudChart" height="250"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- LOAN DISTRIBUTION -->
+    <div class="col-md-4 mb-4">
+
+        <div class="card chart-card">
+
+            <div class="card-header chart-header">
+                💰 Loan Distribution
+            </div>
+
+            <div class="card-body">
+
+                <canvas id="loanChart" height="250"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 {% endblock %}
