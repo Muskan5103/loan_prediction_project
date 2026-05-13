@@ -785,7 +785,7 @@ body {
 }
 
 .hero-content h1 {
-    font-size: 3.2rem;
+    font-size: clamp(2rem, 5vw, 3.2rem);
     font-weight: 700;
     margin-bottom: 1rem;
     background: linear-gradient(90deg, #38bdf8, #22c55e);
@@ -1214,7 +1214,8 @@ table td{
 }
 .chart-card .card-body{
 
-    height: 320px;
+    min-height: 320px;
+    height: auto;
 
     position: relative;
 }
@@ -1223,7 +1224,51 @@ table td{
 
     transition: all 0.4s ease;
 }
+/* FINAL FIXES */
 
+html,
+body {
+    overflow-x: hidden;
+}
+
+* {
+    max-width: 100%;
+}
+
+table {
+    width: 100%;
+    min-width: unset;
+}
+
+.hero-content h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+}
+
+.chart-card .card-body {
+    height: auto;
+    min-height: 320px;
+}
+
+.api-btn,
+.export-btn,
+.btn {
+    max-width: 100%;
+}
+
+@media (max-width: 768px) {
+
+    .loan-form-wrapper,
+    .api-section,
+    .model-section,
+    .cta {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    .card-custom {
+        width: 100%;
+    }
+}
 .chart-card:hover{
 
     transform: translateY(-8px);
@@ -1568,5 +1613,344 @@ canvas{
 
     100%{
         transform: rotate(360deg);
+    }
+}
+
+
+/* =========================================
+   GLOBAL RESPONSIVE FIXES
+========================================= */
+
+img,
+video,
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Prevent horizontal scrolling */
+html,
+body {
+    overflow-x: hidden;
+}
+
+/* =========================================
+   CONTAINER SPACING
+========================================= */
+
+.container,
+.container-fluid {
+    width: 100%;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* =========================================
+   HERO SECTION
+========================================= */
+
+@media (max-width: 992px) {
+
+    .hero,
+    .hero-bg {
+        padding: 3rem 5%;
+        min-height: auto;
+        text-align: center;
+    }
+
+    .hero-content {
+        max-width: 100%;
+    }
+
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-buttons {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+
+    .hero,
+    .hero-bg {
+        padding: 2rem 1rem;
+    }
+
+    .hero-content h1 {
+        font-size: 1.9rem;
+        line-height: 1.3;
+    }
+
+    .hero-content p {
+        font-size: 0.95rem;
+    }
+
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* =========================================
+   STATS GRID
+========================================= */
+
+@media (max-width: 992px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =========================================
+   FORM RESPONSIVE
+========================================= */
+
+@media (max-width: 768px) {
+
+    .loan-form-wrapper,
+    .card-custom,
+    .api-section,
+    .model-section {
+        padding: 20px;
+        margin: 20px 10px;
+    }
+
+    .form-header h1 {
+        font-size: 1.7rem;
+    }
+
+    .two-column-form p {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .two-column-form label {
+        margin-bottom: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .loan-form-wrapper,
+    .card-custom {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .form-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .form-header p {
+        font-size: 0.85rem;
+    }
+
+    .loan-form-wrapper button,
+    .card-custom button {
+        font-size: 0.95rem;
+        padding: 12px;
+    }
+}
+
+/* =========================================
+   TABLE RESPONSIVE
+========================================= */
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* table {
+    min-width: 600px;
+} */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+@media (max-width: 768px) {
+    table {
+        min-width: unset;
+        width: 100%;
+    }
+}
+.row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.container,
+.container-fluid {
+    overflow-x: hidden;
+}
+@media (max-width: 768px) {
+
+    table th,
+    table td {
+        padding: 10px;
+        font-size: 13px;
+    }
+}
+
+/* =========================================
+   API BUTTONS
+========================================= */
+
+@media (max-width: 768px) {
+
+    .api-buttons,
+    .export-buttons,
+    .hero-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .api-btn,
+    .export-btn {
+        width: 100%;
+        min-width: auto;
+    }
+}
+
+/* =========================================
+   CTA SECTION
+========================================= */
+
+@media (max-width: 768px) {
+
+    .cta {
+        margin: 2rem 1rem;
+        padding: 2.5rem 1.5rem;
+    }
+
+    .cta h2 {
+        font-size: 1.6rem;
+    }
+}
+
+/* =========================================
+   CHATBOT RESPONSIVE
+========================================= */
+
+@media (max-width: 576px) {
+
+    .chatbot-box {
+        width: calc(100% - 20px);
+        right: 10px;
+        bottom: 80px;
+    }
+
+    .chatbot-icon {
+        width: 65px;
+        height: 65px;
+        right: 15px;
+        bottom: 15px;
+    }
+
+    .bot-inner {
+        width: 53px;
+        height: 53px;
+        font-size: 24px;
+    }
+}
+
+/* =========================================
+   CARD RESPONSIVE
+========================================= */
+
+@media (max-width: 576px) {
+
+    .card,
+    .chart-card {
+        padding: 16px;
+    }
+
+    .card h3 {
+        font-size: 1.1rem;
+    }
+
+    .card p {
+        font-size: 0.9rem;
+    }
+}
+
+/* =========================================
+   NAVBAR RESPONSIVE
+========================================= */
+
+@media (max-width: 768px) {
+
+    .navbar-brand {
+        font-size: 1rem;
+    }
+
+    .navbar .btn {
+        width: 100%;
+        margin-top: 10px;
+    }
+}
+
+ 
+/* =========================================
+   NAVBAR DROPDOWN FINAL FIX
+========================================= */
+
+/* VERY IMPORTANT */
+.navbar,
+.navbar-custom {
+    overflow: visible !important;
+    height: auto !important;
+}
+
+/* Prevent clipping */
+.container-fluid,
+.container {
+    overflow: visible !important;
+}
+
+/* Dropdown parent */
+.dropdown {
+    position: relative !important;
+}
+
+/* Actual dropdown */
+.dropdown-menu {
+    position: absolute !important;
+    top: calc(100% + 10px) !important;
+    right: 0 !important;
+    left: auto !important;
+
+    display: none;
+
+    min-width: 220px;
+
+    border-radius: 14px;
+
+    z-index: 999999 !important;
+
+    box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+}
+
+/* Show correctly */
+.dropdown-menu.show {
+    display: block;
+}
+
+/* Fix mobile */
+@media (max-width: 768px) {
+
+    .dropdown-menu {
+        right: 0 !important;
+        left: auto !important;
+        min-width: 200px;
     }
 }
