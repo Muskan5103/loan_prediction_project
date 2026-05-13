@@ -340,9 +340,22 @@ table td{
     border-radius:20px;
     color: white;
 }
-.okk{
+/* .okk{
     justify-content: center;
     margin-left: 25%;
+} */
+.okk{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+@media (max-width:768px){
+
+    .okk{
+        margin-left:0 !important;
+        width:100%;
+        justify-content:center;
+    }
 }
 .admin-badge{
     padding:6px 14px;
@@ -388,6 +401,9 @@ table td{
     color:white;
 
     transition:0.3s ease;
+}
+.t1{
+    background-color: black;
 }
 
 .predict-api{
@@ -1463,3 +1479,293 @@ background: linear-gradient(
         font-size:1.6rem;
     }
 }
+
+
+/* =========================================
+   MOBILE NAVBAR FIX
+========================================= */
+
+@media (max-width: 768px){
+
+    /* NAVBAR */
+    .navbar-custom{
+        padding:12px 14px !important;
+    }
+
+    .navbar .container,
+    .navbar .container-fluid{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        flex-wrap:wrap;
+        gap:12px;
+    }
+
+    /* LOGO */
+    .navbar-brand{
+        font-size:1rem !important;
+        display:flex;
+        align-items:center;
+        gap:8px;
+    }
+
+    .navbar-brand img{
+        width:28px;
+        height:28px;
+    }
+
+    /* RIGHT SIDE */
+    .navbar-right,
+    .nav-actions{
+        display:flex;
+        align-items:center;
+        gap:10px;
+        margin-left:auto;
+    }
+
+    /* DARK MODE BUTTON */
+    .theme-toggle,
+    .dark-toggle,
+    .moon-btn{
+        width:52px !important;
+        height:52px !important;
+
+        display:flex;
+        align-items:center;
+        justify-content:center;
+
+        border-radius:50%;
+    }
+
+    /* PROFILE BUTTON */
+    .profile-badge{
+        padding:10px 14px !important;
+
+        font-size:14px !important;
+
+        border-radius:999px;
+
+        white-space:nowrap;
+    }
+
+    /* DROPDOWN */
+    .dropdown-menu{
+        right:0 !important;
+        left:auto !important;
+
+        min-width:180px !important;
+    }
+
+    /* HERO SECTION TOP SPACE */
+    .hero-bg{
+        padding-top:3rem;
+    }
+}
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 480px){
+
+    .navbar-custom{
+        padding:10px !important;
+    }
+
+    .navbar-brand{
+        font-size:0.92rem !important;
+    }
+
+    .profile-badge{
+        padding:8px 12px !important;
+        font-size:13px !important;
+    }
+
+    .theme-toggle,
+    .dark-toggle,
+    .moon-btn{
+        width:46px !important;
+        height:46px !important;
+    }
+
+    .navbar-right,
+    .nav-actions{
+        gap:8px;
+    }
+}
+
+/* =========================================
+   MOBILE INPUT TEXT FIX
+========================================= */
+
+input,
+select,
+textarea{
+    color:#ffffff !important;
+    background:#020617 !important;
+}
+
+/* Placeholder */
+input::placeholder,
+textarea::placeholder{
+    color:#94a3b8 !important;
+    opacity:1;
+}
+
+/* Mobile browser autofill fix */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill{
+
+    -webkit-text-fill-color:#ffffff !important;
+
+    transition:
+        background-color 9999s ease-in-out 0s;
+
+    box-shadow:
+        0 0 0px 1000px #020617 inset !important;
+}
+
+/* Mobile responsive filters */
+@media (max-width:768px){
+
+    input,
+    select,
+    textarea{
+
+        width:100%;
+
+        font-size:16px !important;
+
+        color:#ffffff !important;
+
+        background:#020617 !important;
+
+        border:1px solid rgba(255,255,255,0.12);
+
+        padding:14px 16px;
+
+        border-radius:14px;
+    }
+
+    input::placeholder{
+        color:#94a3b8 !important;
+    }
+
+    /* SEARCH INPUT */
+    .search-input{
+        color:#ffffff !important;
+    }
+
+    .search-input::placeholder{
+        color:#94a3b8 !important;
+    }
+}
+
+
+/* =========================================
+   DARK ML TABLE
+========================================= */
+
+.table-responsive{
+    width:100%;
+
+    overflow-x:auto;
+
+    -webkit-overflow-scrolling:touch;
+
+    border-radius:18px;
+}
+
+/* TABLE */
+.table-responsive table{
+    width:100%;
+
+    min-width:900px;
+
+    border-collapse:collapse;
+
+    background:#071426 !important;
+
+    color:#e5e7eb !important;
+}
+
+/* HEADER */
+.table-responsive table thead{
+    background:#1e293b !important;
+}
+
+.table-responsive table th{
+    background:#1e293b !important;
+
+    color:#f8fafc !important;
+
+    border:none !important;
+
+    padding:16px 18px;
+
+    white-space:nowrap;
+
+    text-align:center;
+
+    font-weight:700;
+}
+
+/* BODY */
+.table-responsive table tbody{
+    background:#071426 !important;
+}
+
+/* ROWS */
+.table-responsive table tr{
+    background:#071426 !important;
+}
+
+/* CELLS */
+.table-responsive table td{
+    background:#071426 !important;
+
+    color:#e2e8f0 !important;
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.06) !important;
+
+    padding:16px 18px;
+
+    white-space:nowrap;
+
+    text-align:center;
+}
+
+/* REMOVE BOOTSTRAP WHITE */
+.table,
+.table-striped,
+.table-hover,
+.table-bordered{
+    background:transparent !important;
+
+    color:#e5e7eb !important;
+}
+
+/* HOVER */
+.table-responsive table tbody tr:hover{
+    background:#0f172a !important;
+}
+
+/* MOBILE */
+@media (max-width:768px){
+
+    .table-responsive table{
+        min-width:950px;
+    }
+
+    .table-responsive table th,
+    .table-responsive table td{
+        font-size:12px;
+
+        padding:12px 16px;
+    }
+}
+

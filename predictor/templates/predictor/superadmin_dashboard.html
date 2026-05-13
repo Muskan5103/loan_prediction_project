@@ -76,83 +76,83 @@
 
     <h2>🤖 ML Model Comparison</h2>
 
-    <table>
-
+    <div class="table-responsive t1">
+      <table class="table">
         <thead>
-            <tr>
-                <th>Version</th>
-                <th>Accuracy</th>
-                <th>Status</th>
-                <th>Uploaded</th>
-                <th>Action</th>
-            </tr>
+          <tr>
+            <th>Version</th>
+            <th>Accuracy</th>
+            <th>Status</th>
+            <th>Uploaded</th>
+            <th>Action</th>
+          </tr>
         </thead>
 
         <tbody>
 
-            {% for model in models %}
+          {% for model in models %}
 
-            <tr>
+          <tr>
 
-                <td>{{ model.version }}</td>
+            <td>{{ model.version }}</td>
 
-                <td>
-                    {{ model.accuracy }}%
-                </td>
+            <td>
+              {{ model.accuracy }}%
+            </td>
 
-                <td>
+            <td>
 
-                    {% if model.is_active %}
+              {% if model.is_active %}
 
-                        <span class="active-badge">
-                            ACTIVE
-                        </span>
+              <span class="active-badge">
+                ACTIVE
+              </span>
 
-                    {% else %}
+              {% else %}
 
-                        <span class="inactive-badge">
-                            INACTIVE
-                        </span>
+              <span class="inactive-badge">
+                INACTIVE
+              </span>
 
-                    {% endif %}
+              {% endif %}
 
-                </td>
+            </td>
 
-                <td>
-                    {{ model.uploaded_at|date:"M d, Y" }}
-                </td>
+            <td>
+              {{ model.uploaded_at|date:"M d, Y" }}
+            </td>
 
-                <td>
+            <td>
 
-                    {% if not model.is_active %}
+              {% if not model.is_active %}
 
-                    <a href="{% url 'activate_model' model.id %}">
+              <a href="{% url 'activate_model' model.id %}">
 
-                        <button class="activate-btn">
-                            Activate
-                        </button>
+                <button class="activate-btn">
+                  Activate
+                </button>
 
-                    </a>
+              </a>
 
-                    {% else %}
+              {% else %}
 
-                    <button class="active-btn">
-                        Active
-                    </button>
+              <button class="active-btn">
+                Active
+              </button>
 
-                    {% endif %}
+              {% endif %}
 
-                </td>
+            </td>
 
-            </tr>
+          </tr>
 
-            {% endfor %}
+          {% endfor %}
 
         </tbody>
 
-    </table>
-
-</div>
+      </table>
+    </div>
+  </div>
   {% if active_model %}
   <p><strong>Active Model:</strong> {{ active_model.file.name }}</p>
   {% else %}
