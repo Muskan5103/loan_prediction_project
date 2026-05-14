@@ -1562,108 +1562,94 @@ background: linear-gradient(
     }
 }
 
-/* =========================================
-   SMALL MOBILE
-========================================= */
 
-@media (max-width: 480px){
 
-    .navbar-custom{
-        padding:10px !important;
-    }
 
-    .navbar-brand{
-        font-size:0.92rem !important;
-    }
-
-    .profile-badge{
-        padding:8px 12px !important;
-        font-size:13px !important;
-    }
-
-    .theme-toggle,
-    .dark-toggle,
-    .moon-btn{
-        width:46px !important;
-        height:46px !important;
-    }
-
-    .navbar-right,
-    .nav-actions{
-        gap:8px;
-    }
-}
 
 /* =========================================
    MOBILE INPUT TEXT FIX
 ========================================= */
 
+/* =========================================
+   FINAL MOBILE INPUT FIX
+========================================= */
+
+/* ALL INPUTS */
+.form-control,
+.form-select,
 input,
 select,
 textarea{
-    color:#ffffff !important;
     background:#020617 !important;
+    color:#ffffff !important;
+
+    border:1px solid rgba(255,255,255,0.12) !important;
 }
 
-/* Placeholder */
-input::placeholder,
-textarea::placeholder{
+/* PLACEHOLDER */
+.form-control::placeholder,
+input::placeholder{
     color:#94a3b8 !important;
     opacity:1;
 }
 
-/* Mobile browser autofill fix */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-textarea:-webkit-autofill,
-select:-webkit-autofill{
-
-    -webkit-text-fill-color:#ffffff !important;
-
-    transition:
-        background-color 9999s ease-in-out 0s;
-
-    box-shadow:
-        0 0 0px 1000px #020617 inset !important;
+/* DATE INPUT ICON */
+input[type="date"]{
+    color-scheme:dark;
 }
 
-/* Mobile responsive filters */
+/* DATE TEXT */
+input[type="date"]::-webkit-datetime-edit{
+    color:#ffffff !important;
+}
+
+/* DATE PLACEHOLDER */
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field{
+    color:#ffffff !important;
+}
+
+/* CALENDAR ICON */
+input[type="date"]::-webkit-calendar-picker-indicator{
+    filter:invert(1);
+    cursor:pointer;
+}
+
+/* SELECT OPTIONS */
+select option{
+    background:#020617 !important;
+    color:#ffffff !important;
+}
+
+/* FOCUS */
+.form-control:focus,
+.form-select:focus{
+    background:#020617 !important;
+    color:#ffffff !important;
+
+    border-color:#2563eb !important;
+
+    box-shadow:
+        0 0 0 0.2rem rgba(37,99,235,0.2) !important;
+}
+
+/* MOBILE */
 @media (max-width:768px){
 
-    input,
-    select,
-    textarea{
-
-        width:100%;
+    .form-control,
+    .form-select{
 
         font-size:16px !important;
+
+        min-height:52px;
 
         color:#ffffff !important;
 
         background:#020617 !important;
-
-        border:1px solid rgba(255,255,255,0.12);
-
-        padding:14px 16px;
-
-        border-radius:14px;
-    }
-
-    input::placeholder{
-        color:#94a3b8 !important;
-    }
-
-    /* SEARCH INPUT */
-    .search-input{
-        color:#ffffff !important;
-    }
-
-    .search-input::placeholder{
-        color:#94a3b8 !important;
     }
 }
-
 
 /* =========================================
    DARK ML TABLE
@@ -1769,3 +1755,171 @@ select:-webkit-autofill{
     }
 }
 
+/* =========================================
+   SINGLE LINE MOBILE NAVBAR
+========================================= */
+
+.nav-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-left:auto;
+}
+
+/* MOBILE */
+@media (max-width:768px){
+
+    /* NAVBAR */
+    .navbar{
+        padding:10px 12px !important;
+    }
+
+    /* KEEP EVERYTHING IN ONE ROW */
+    .navbar .container-fluid{
+        display:flex !important;
+
+        flex-direction:row !important;
+
+        align-items:center !important;
+
+        justify-content:space-between !important;
+
+        flex-wrap:nowrap !important;
+
+        gap:10px;
+    }
+
+    /* LOGO */
+    .navbar-brand{
+        display:flex;
+        align-items:center;
+
+        gap:6px;
+
+        margin:0 !important;
+
+        font-size:0.9rem !important;
+
+        white-space:nowrap;
+
+        overflow:hidden;
+
+        text-overflow:ellipsis;
+
+        max-width:140px;
+    }
+
+    .navbar-brand span:first-child{
+        font-size:1rem !important;
+    }
+
+    /* RIGHT SIDE */
+    .nav-actions{
+        display:flex;
+
+        align-items:center;
+
+        gap:8px;
+
+        margin-left:auto;
+
+        flex-shrink:0;
+    }
+
+    /* MOON BUTTON */
+    #themeToggle{
+        width:42px !important;
+        height:42px !important;
+
+        border-radius:50%;
+
+        padding:0 !important;
+
+        display:flex;
+        align-items:center;
+        justify-content:center;
+
+        font-size:1rem;
+    }
+
+    /* PROFILE BUTTON */
+    .his{
+        padding:8px 12px !important;
+
+        font-size:12px !important;
+
+        white-space:nowrap;
+
+        border-radius:999px;
+    }
+
+    /* DROPDOWN */
+    .dropdown-menu{
+        right:0 !important;
+        left:auto !important;
+
+        min-width:170px;
+    }
+}
+
+/* EXTRA SMALL MOBILE */
+@media (max-width:480px){
+
+    .navbar-brand{
+        max-width:120px;
+        font-size:0.82rem !important;
+    }
+
+    .his{
+        padding:7px 10px !important;
+        font-size:11px !important;
+    }
+
+    #themeToggle{
+        width:38px !important;
+        height:38px !important;
+    }
+}
+
+
+/* =========================================
+   ACTION BUTTON FIX
+========================================= */
+
+.action-buttons{
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:10px;
+
+    flex-wrap:wrap;
+}
+
+/* FORMS */
+.action-buttons form{
+    margin:0;
+}
+
+/* BUTTONS */
+.action-buttons .btn{
+    min-width:90px;
+
+    white-space:nowrap;
+
+    border-radius:10px;
+}
+
+/* MOBILE */
+@media (max-width:768px){
+
+    .action-buttons{
+        flex-direction:column;
+    }
+
+    .action-buttons .btn{
+        width:100%;
+    }
+}
