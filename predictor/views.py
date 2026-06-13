@@ -49,35 +49,50 @@ from django.shortcuts import render, redirect
 
 from django.core.exceptions import PermissionDenied
 
-@login_required
-def home(request):
-    user = request.user
+# @login_required
+# def home(request):
+#     user = request.user
 
-    # 👑 Super Admin → redirect
-    if user.is_superuser:
+#     # 👑 Super Admin → redirect
+#     if user.is_superuser:
+#         return redirect("superadmin_dashboard")
+
+#     # 👨‍💼 Admin → redirect
+#     if user.is_staff:
+#         return redirect("admin_dashboard")
+
+#     # 👤 Normal user only
+#     return render(request, 'predictor/home.html')
+def home(request):
+
+    # 👑 Super Admin
+    if request.user.is_authenticated and request.user.is_superuser:
         return redirect("superadmin_dashboard")
 
-    # 👨‍💼 Admin → redirect
-    if user.is_staff:
+    # 👨‍💼 Admin
+    if request.user.is_authenticated and request.user.is_staff:
         return redirect("admin_dashboard")
 
-    # 👤 Normal user only
-    return render(request, 'predictor/home.html')
+    # 🌐 Everyone can see homepage
+    return render(request, "predictor/home.html")
 
 
 def index(request):
-    # 👑 Superadmin redirect
-    if request.user.is_authenticated:
-        if request.user.is_superuser:
-            return redirect("superadmin_dashboard")
 
-        # 👨‍💼 Admin redirect
-        if request.user.is_staff:
-            return redirect("admin_dashboard")
+    # 👑 Super Admin
+    if request.user.is_authenticated and request.user.is_superuser:
+        return redirect("superadmin_dashboard")
 
-    # 👤 Guest + normal user
+    # 👨‍💼 Admin
+    elif request.user.is_authenticated and request.user.is_staff:
+        return redirect("admin_dashboard")
+
+    # 👤 Normal User
+    elif request.user.is_authenticated:
+        return redirect("home")
+
+    # 🌐 Guest User
     return render(request, "predictor/index.html")
-
 
 def generate_ai_explanation(income, loan_amount, probability):
     reasons = []
@@ -258,7 +273,9 @@ def generate_ai_explanation(income, loan_amount, probability):
 from .fraud_detection import detect_fraud
 import numpy as np
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 
+@login_required(login_url='login')
 def result(request):
 
     if request.method == 'POST':

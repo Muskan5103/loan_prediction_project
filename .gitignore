@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# Django
+*.log
+db.sqlite3
+
+# Media Files
+media/
+
+# Static Files Collected
+staticfiles/
+
+# Environment Variables
+.env
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Python Packaging
+build/
+dist/
+*.egg-info/
+
+# Migrations (Optional)
+# */migrations/*
+# !*/migrations/__init__.py
+
+# Secret Keys
+secret_key.txt
+
+# Coverage
+.coverage
+htmlcov/
+
+# Cache
+.cache/
+
+# SQLite journal files
+*.sqlite3-journal

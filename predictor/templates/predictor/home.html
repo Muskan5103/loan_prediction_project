@@ -6,77 +6,96 @@ Home | Loan Approval Predictor
 
 {% block content %}
 
-{% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
-
-
 <section class="hero hero-bg">
     <div class="hero-overlay"></div>
 
     <div class="hero-content">
+
         <h1>Loan Approval Prediction</h1>
+
         <p>
             Predict your loan approval instantly using
             <span>Machine Learning</span>.
         </p>
 
         <div class="hero-buttons">
-            <a href="{% url 'loan_form' %}" class="btn primary">Check Loan Eligibility</a>
-            <a href="#how-it-works" class="btn secondary">How It Works</a>
+
+            {% if user.is_authenticated %}
+
+            <a href="{% url 'loan_form' %}" class="btn primary">
+                Check Loan Eligibility
+            </a>
+
+            {% else %}
+
+            <a href="{% url 'login' %}" class="btn primary">
+                Login to Check Eligibility
+            </a>
+
+            {% endif %}
+
+            <a href="#how-it-works" class="btn secondary">
+                How It Works
+            </a>
+
         </div>
+
     </div>
 </section>
 
-<!-- How It Works -->
+<!-- HOW IT WORKS -->
 <section id="how-it-works" class="how">
+
     <h2>How It Works</h2>
 
     <div class="steps">
+
         <div class="card co">
             <h3>1️⃣ Enter Details</h3>
-            <p>Provide personal and financial information.</p>
+            <p>
+                Provide personal and financial information.
+            </p>
         </div>
 
         <div class="card co">
             <h3>2️⃣ ML Analysis</h3>
-            <p>Our trained ML model analyzes your data.</p>
+            <p>
+                Our trained ML model analyzes your data.
+            </p>
         </div>
 
         <div class="card co">
             <h3>3️⃣ Get Result</h3>
-            <p>Instant prediction: Approved or Not Approved.</p>
+            <p>
+                Instant prediction: Approved or Not Approved.
+            </p>
         </div>
+
     </div>
+
 </section>
 
-
+<!-- CTA -->
 <section class="cta">
-    <h2>Ready to check your loan eligibility?</h2>
+
+    <h2>
+        Ready to check your loan eligibility?
+    </h2>
+
+    {% if user.is_authenticated %}
+
     <a href="{% url 'loan_form' %}" class="btn primary">
         Start Prediction
     </a>
-</section>
 
-{% else %}
+    {% else %}
 
+    <a href="{% url 'login' %}" class="btn primary">
+        Login First
+    </a>
 
-
-<div class="container text-center mt-5">
-    <h2 class="text-danger">🚫 Access Restricted</h2>
-    <p class="text-muted">
-        This page is only for customers.
-    </p>
-
-    {% if user.is_superuser %}
-        <a href="{% url 'superadmin_dashboard' %}" class="btn btn-warning mt-3">
-            Go to Superadmin Dashboard
-        </a>
-    {% elif user.is_staff %}
-        <a href="{% url 'admin_dashboard' %}" class="btn btn-primary mt-3">
-            Go to Admin Dashboard
-        </a>
     {% endif %}
-</div>
 
-{% endif %}
+</section>
 
 {% endblock %}
