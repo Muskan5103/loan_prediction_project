@@ -227,6 +227,7 @@ canvas{
     box-shadow:0 6px 18px rgba(0,0,0,0.1);
 
     text-align:center;
+    color:#e5e7eb;
 }
 
 .card:hover{
@@ -1923,3 +1924,4 @@ select option{
         width:100%;
     }
 }
+
