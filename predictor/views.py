@@ -622,30 +622,47 @@ def history(request):
 
 
 
+# def register(request):
+#     if request.method == 'POST':
+#         form = RegisterForm(request.POST)
+#         if form.is_valid():
+#             user = form.save()
+#             login(request, user)   # ✅ THIS IS REQUIRED
+#             return redirect('home')  # or dashboard
+#     else:
+#         form = RegisterForm()
+
+#     if form.is_valid():
+#         user = form.save()
+#         print("USER CREATED:", user.username)
+#         login(request, user)
+#         return redirect('home')
+#     else:
+#         print(form.errors)
+
+
+#     return render(request, 'predictor/register.html', {'form': form})
+
+
+
+from django.contrib.auth import login
+
 def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
+
         if form.is_valid():
             user = form.save()
-            login(request, user)   # ✅ THIS IS REQUIRED
-            return redirect('home')  # or dashboard
+            print("USER CREATED:", user.username)
+            login(request, user)
+            return redirect('home')
+        else:
+            print(form.errors)
+
     else:
         form = RegisterForm()
 
-    if form.is_valid():
-        user = form.save()
-        print("USER CREATED:", user.username)
-        login(request, user)
-        return redirect('home')
-    else:
-        print(form.errors)
-
-
     return render(request, 'predictor/register.html', {'form': form})
-
-
-
-
 
 
 
