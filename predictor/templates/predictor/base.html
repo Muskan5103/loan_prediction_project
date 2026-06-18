@@ -47,7 +47,7 @@
 
                 <!-- Dark Mode -->
                 <button id="themeToggle" class="btn btn-warning btn-sm rounded-pill px-3" title="Toggle Dark Mode">
-                    🌙
+                  <span class="moon-icon">🌙</span>
                 </button>
 
                 {% if user.is_authenticated %}
@@ -103,11 +103,11 @@
 
                 <!-- Login / Register (no dropdown) -->
                 <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm rounded-pill px-3">
-                    🔐 Login
+                     Login
                 </a>
 
                 <a href="{% url 'register' %}" class="btn btn-warning btn-sm rounded-pill px-3">
-                    📝 Register
+                    Register
                 </a>
 
                 {% endif %}

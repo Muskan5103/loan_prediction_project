@@ -1481,7 +1481,17 @@ background: linear-gradient(
     }
 }
 
+@media (max-width:768px){
 
+    .nav-actions .btn{
+        padding: 4px 8px !important;
+        font-size: 11px !important;
+    }
+
+    .nav-actions{
+        gap: 4px !important;
+    }
+}
 /* =========================================
    MOBILE NAVBAR FIX
 ========================================= */
@@ -1490,7 +1500,8 @@ background: linear-gradient(
 
     /* NAVBAR */
     .navbar-custom{
-        padding:12px 14px !important;
+        padding:8px 14px !important;
+    min-height:60px;
     }
 
     .navbar .container,
@@ -1528,19 +1539,20 @@ background: linear-gradient(
     .theme-toggle,
     .dark-toggle,
     .moon-btn{
-        width:52px !important;
-        height:52px !important;
+        width:20px !important;
+        height:20px !important;
 
         display:flex;
         align-items:center;
         justify-content:center;
-
+padding:0 !important;
+    font-size:14px !important;
         border-radius:50%;
     }
 
     /* PROFILE BUTTON */
     .profile-badge{
-        padding:10px 14px !important;
+        padding:6px 12px !important;
 
         font-size:14px !important;
 
@@ -1596,7 +1608,20 @@ input::placeholder{
 
 /* DATE INPUT ICON */
 input[type="date"]{
-    color-scheme:dark;
+    background:#020617 !important;
+    color:#ffffff !important;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator{
+    filter:invert(1);
+}
+.card-body input[type="date"]{
+    color:white !important;
+    background:#020617 !important;
+}
+
+.card-body input[type="date"]::-webkit-datetime-edit{
+    color:white !important;
 }
 
 /* DATE TEXT */
@@ -1877,12 +1902,14 @@ select option{
     }
 
     #themeToggle{
-        width:38px !important;
-        height:38px !important;
+        width:20px !important;
+        height:20px !important;
     }
 }
 
-
+.moon-icon {
+    font-size: 12px; 
+}
 /* =========================================
    ACTION BUTTON FIX
 ========================================= */
